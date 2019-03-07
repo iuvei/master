@@ -1,0 +1,7 @@
+div.aipSeting
+	el-radio-group(v-model="activeName" style="margin-bottom: 30px;" @change="handleClick")
+		el-radio-button(label="gameLabel") 游戏标签分类
+		el-radio-button(label="labelManage") 标签类型管理
+
+	gameLabel(:permissions="permissions" v-if='activeName=="gameLabel"')
+	labelManage(:permissions="permissions" v-if='activeName=="labelManage"')

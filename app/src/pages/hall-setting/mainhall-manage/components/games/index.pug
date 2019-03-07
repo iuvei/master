@@ -1,0 +1,7 @@
+el-dialog(:visible.sync="dialogVisible" title="游戏设置" width="670px" :close-on-click-modal="false")
+  el-form(size="small" ref="form" label-width="80px")
+    el-form-item(v-for="item,index in gameObject" :key="index" :label="formatName(index)")
+      select-all(:options="item" @onchange="onGameChange" :index="index" :checkedDefut="games[index] || []")   
+  .dialog-footer(slot="footer")
+    el-button(size="small" @click="dialogVisible = false") 取消
+    el-button(size="small" type="primary" @click="submit") 确定

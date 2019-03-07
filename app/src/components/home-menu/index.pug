@@ -1,0 +1,13 @@
+aside.home-menu(:class="isMeunCollapse ? 'collapsed' : 'expanded'")
+  el-menu(:default-active="$route.path" router unique-opened :collapse="isMeunCollapse")
+    template(v-for="(item, index) of list" v-if="item.meta.show")
+      el-submenu(v-if="item.children && item.children.length > 0 && item.children[0].path !== ''" :index="item.path + index" :key="index")
+        template(slot="title")
+          i.iconfont(v-if="item.meta.icon" :class="item.meta.icon")
+          span(slot="title") {{ item.meta.title }}
+        el-menu-item(v-for="_item, _index of item.children" v-if="_item.meta.show" :index="item.path + _item.path" :key="_index")
+          i.iconfont(v-if="_item.meta.icon" :class="_item.meta.icon")
+          span(slot="title") {{ _item.meta.title }}
+      el-menu-item(v-else :index="item.path")
+          i.iconfont(v-if="item.meta.icon" :class="item.meta.icon")
+          span(slot="title") {{ item.meta.title }}

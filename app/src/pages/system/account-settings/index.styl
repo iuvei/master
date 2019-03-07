@@ -1,0 +1,54 @@
+$greenColor = #3cbf55
+$redColor = #ee5665
+$blueColor = #3f94f4
+
+*
+  box-sizing border-box
+
+.account-settings-container
+  .filter
+    display flex
+    justify-content space-between
+
+    .btn
+      margin-left 20px
+
+    .add
+      margin-right 20px
+
+    .el-form-item
+      padding-left 20px
+
+    .el-input
+      width 130px
+
+    .el-select
+      width 140px
+
+  .table
+    >>>
+      .red
+        color $redColor
+
+      .green
+        color $greenColor
+
+      .blue
+        color $blueColor
+
+      .pointer
+        cursor pointer
+
+  .account-settings-dialog-container
+    .form
+      >>>
+        .el-input, .el-textarea
+          width 90%
+
+        .el-radio-group
+          .el-radio
+            line-height 32px
+            margin-right 30px
+
+          .el-radio+.el-radio
+            margin-left 0

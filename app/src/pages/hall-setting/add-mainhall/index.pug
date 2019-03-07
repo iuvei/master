@@ -1,0 +1,82 @@
+.add-mainhall-container
+  el-steps(:active="step" simple finish-status="success")
+    el-step(title="添加厅主信息")
+    el-step(title="域名配置")
+    el-step(title="游戏设置")
+    el-step(title="完成")
+  el-row(v-loading="loading" element-loading-text="Loading...")
+    .add-mainhall-step-container
+      step1(v-show="step === 1" :emergencyContacts="emergencyContacts" ref="step1")
+      step2(v-show="step === 2" ref="step2")
+      step3(v-show="step === 3" :partnerTypes="partnerTypes" ref="step3")
+      .step4(v-if="step === stepLen")
+        .table
+          .table-row
+            .table-row-left 厅主信息
+            .table-row-right
+              step1(:data="formData" :emergencyContacts="emergencyContacts" :disabled="true")
+          .table-row
+            .table-row-left 域名配置
+            .table-row-right.pdTop20
+              step2(:data="formData" :disabled="true")
+          .table-row
+            .table-row-left 游戏设置
+            .table-row-right.pdTop20
+              step3(:partnerTypes="partnerTypes" :disabled="true")
+      .add-mainhall-footer-btn-group
+        el-button(v-if="step > 1" @click="prev") 上一步
+        el-button(v-if="step < stepLen" type="primary" @click="next") 下一步
+        el-button(v-if="step === stepLen" type="primary" @click="submit") 完成
+  el-dialog(title="厅主信息" width="30%" :visible.sync="dialogVisible" @closed="goto" :close-on-click-modal='false')
+    .dialog-container
+      .img-box
+        img(src="./img/success.png")
+      .congratulations 恭喜开厅成功！
+      .info
+        .info-label 厅主名称:
+        .info-value {{successInfo.company_name}}
+      .info
+        .info-label 后台登录账号:
+        .info-value {{successInfo.admin_name}}
+      .info
+        .info-label 后台账号密码:
+        .info-value {{successInfo.admin_password}}
+      .info
+        .info-label 域名:
+        .info-value
+          div(v-for="domain,index in successInfo.domains" :key="index" ) 
+            div.bor(v-if='index==0')
+              p 所有域名格式请参考:
+              p 厅主域名：
+                a(:href="'http://admin.'+domain" target="_blank") admin.{{domain}}
+              p PC域名：
+                a(:href="'http://www.'+domain" target="_blank") www.{{domain}}
+              p H5域名：
+                a(:href="'http://m.'+domain" target="_blank") m.{{domain}}
+              p 代理域名：
+                a(:href="'http://agent.'+domain" target="_blank") agent.{{domain}}
+            div(v-else)
+              p 其他域名: {{domain}}   
+      .info
+        .info-label 默认股东账号:
+        .info-value {{successInfo.shareholder}}
+      .info
+        .info-label 默认股东账号密码:
+        .info-value {{successInfo.shareholder_password}}
+      .info
+        .info-label 默认代理账号:
+        .info-value {{successInfo.agent}}
+      .info
+        .info-label 默认股东代理密码:
+        .info-value {{successInfo.agent_password}}
+      .info
+        .info-label 谷歌验证码:
+        .info-value
+          div(:class="successInfo.is_use_googlekey ? 'green' : 'red'") {{successInfo.is_use_googlekey ? '启用' : '停用'}}
+      .info
+        .info-label 厅主状态:
+        .info-value
+          div(:class="successInfo.status ? 'green' : 'red'") {{successInfo.status ? '启用' : '停用'}}
+    span.dialog-footer(slot="footer")
+      el-button(@click="goto") 完 成
+      el-button(type="primary" v-clipboard:copy="copyText", v-clipboard:success="onCopySuccess", v-clipboard:error="onCopyError") 复制信息

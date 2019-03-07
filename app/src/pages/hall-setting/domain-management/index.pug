@@ -1,0 +1,86 @@
+.domain-management
+  //- 数据筛选
+  .filter
+    el-form.form(:model="form", :inline="true", size="small", @keyup.enter.native="onQueryClick")
+      el-form-item(label="厅主名称")
+        el-select(
+          v-model="form.hall_id", 
+          filterable, 
+          clearable,
+          placeholder="请输入厅主名称",
+        )
+          el-option(
+            v-for="item in hallNameList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value")
+      el-form-item(label="状态")
+        el-select(v-model="form.status" placeholder="请选择")
+          el-option(label="全部", value="")
+          el-option(label="启用", value="1")
+          el-option(label="停用", value="0")
+      el-form-item.query
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+    el-form
+      el-form-item.add
+        el-button(v-if="unauthorizedBtnDic.add" type="success" @click="onAddClick" size="small") 新增域名
+  //- 表格
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading" ref="table")
+      el-table-column(
+        align="center" 
+        v-for="item, index in tableHead"
+        :key="item.index"
+        :label="item.label"
+        :prop="item.prop"
+        :width="item.width"
+        :min-width="item.minWidth"
+        :formatter="item.formatter")
+      el-table-column(align="center" label="操作" width="180" fixed="right")
+        template(slot-scope="scope")
+          el-button(type="success" size="small" @click="statusSwitch(scope.row, 'on')", v-if="unauthorizedBtnDic.reversal && scope.row.status===0") 启用
+          el-button(type="warning" size="small" @click="statusSwitch(scope.row, 'off')", v-if="unauthorizedBtnDic.reversal && scope.row.status===1") 停用
+          el-button(size="small" type="primary" @click="onEdit(scope.row)" v-if="unauthorizedBtnDic.edit") 编辑
+    el-pagination.pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+  //- 新增 对话框
+  el-dialog(:title="'新增域名'" width="30%", :visible.sync="isDialogVisible" @closed="resetAdd", @open="domainHallNameList" :close-on-click-modal="false")
+    el-form(:model="addDomainForm" size="small" label-width="100px" ref="addDomainForm")
+      el-form-item(label="厅主名称", prop="name", :rules="rules.name")
+        el-select(
+          v-model="addDomainForm.name", 
+          filterable,  
+          clearable,
+          placeholder="请输入厅主名称",
+          :style="{width:'100%'}")
+          el-option(
+            v-for="item in hallNameList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value")
+      el-form-item(
+        v-for="(domain, index) in addDomainForm.domains", 
+        :key="domain.index",  
+        :label="`域名`", 
+        :prop="'domains.' + index + '.value'"
+        :rules="rules.domains")
+        el-input(v-model="domain.value")
+          el-button(slot="append" icon="el-icon-plus", v-if="index===addDomainForm.domains.length-1", @click="addDomain")
+          el-button(slot="append" icon="el-icon-minus",v-else-if="dialogType===0", @click.prevent="removeDomain(domain)")
+      section
+        p(v-for="item in instructions", :key="item") {{item}}
+    span(slot="footer" class="dialog-footer")
+      el-button(size="small" type="cancel" @click="isDialogVisible = false") 取消
+      el-button(size="small" type="primary" @click="submitForm('addDomainForm')") 保存
+  //- 编辑域名
+  el-dialog(:title="'编辑域名'" width="30%", :visible.sync="isEditDialogVisible" :close-on-click-modal="false")
+    el-form(:model="editDomainForm" size="small" label-width="100px" ref="editDomainForm")
+      el-form-item(label="厅主名称")
+        el-input(v-model="editDomainForm.hall_name", disabled)
+      el-form-item(label="域名", :rules="rules.domains", prop="domain")
+        el-input(v-model="editDomainForm.domain")  
+      section
+        p(v-for="item in instructions", :key="item") {{item}}
+    span(slot="footer" class="dialog-footer")
+      el-button(size="small" type="cancel" @click="isEditDialogVisible = false") 取消
+      el-button(size="small" type="primary" @click="submitForm('editDomainForm')") 修改

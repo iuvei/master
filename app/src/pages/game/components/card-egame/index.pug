@@ -1,0 +1,59 @@
+div.cardEgame
+  .filter
+    el-form(:model="form" :inline="true" size="small")
+      el-form-item(label="游戏类型")
+        el-select(v-model="form.game_type" placeholder="请选择" @change='change')
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="游戏API")
+        el-select(v-model="form.partner_id" placeholder="请选择")
+          el-option(v-for="item in optionAPI" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="gameID")
+        el-input(v-model="form.game_id")
+      el-form-item(label="游戏名称")
+        el-input(v-model="form.game_name")
+      el-form-item.btn
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+    el-form
+      el-button.addbtn(@click="addClick" v-if="unauthorizedBtnDic.id_1" type="success"  size='small') 新增游戏
+
+  .table
+    .zhu 注：只有棋牌和部分电子API支持在本页面“新增游戏”；不可通过本页面新增游戏的api需至第三方管理后台进行操作。
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      template(v-for="item, index in tableHead")
+        el-table-column(align="center" :key="index" :label="item.label" :prop="item.prop" v-if="!item.type" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter" :render-header="item.renderHeader")
+      el-table-column(align="center" label="操作" width="200")
+          template(slot-scope="scope")
+            el-button(type="primary" size="mini" v-if="unauthorizedBtnDic.id_2" @click='edit(scope.row)') 编 辑
+            el-button(type="danger" size="mini" v-if="unauthorizedBtnDic.id_3"  @click='remove(scope.row)') 删 除
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+  
+  el-dialog(:title="dialogType? '新增':'编辑'" width='550px' :visible.sync="isDialogVisible" :close-on-click-modal="false" @closed='onResetFields')
+    el-form(:model="dialogform" labelWidth='110px' :rules="rules"  size="small" ref="dialogForm")
+      el-form-item(label="游戏类型" prop='game_type')
+        el-select(v-model="dialogform.game_type" placeholder="请选择" :disabled="!dialogType"  @change="changeType")
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="游戏API" prop='partner_id')
+        el-tooltip(placement="top")
+          p(slot="content") 右侧下拉框api选项为支持通过此页面新增游戏的api，<br />其他未展示出来的api需至第三方管理后台进行操作。
+          i.explains.el-icon-question
+        el-select(v-model="dialogform.partner_id" placeholder="请选择" :disabled="!dialogType")
+          el-option(v-for="item in addAPI" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="游戏名称" prop='name')
+        el-input(v-model="dialogform.name")
+      el-form-item(label="gameID" prop='game_id')
+        el-input(v-model="dialogform.game_id" :disabled="!dialogType")
+      el-form-item(label="game_url" prop='game_url')
+        el-input(v-model="dialogform.game_url")
+      el-form-item(label="H5端图片上传" prop="img_h5_url")
+        upload(v-model='dialogform.img_h5_url' accept=".png, .jpg, .jpeg" listType="picture"  :sizeText='sizeTextH5' :fileList="fileListH5"  :maxpic='maxpic' :clean="!isDialogVisible" )
+      el-form-item(label="PC端图片上传" prop="img_url")
+        upload(v-model='dialogform.img_url' accept=".png, .jpg, .jpeg" :sizeText='sizeTextPc' listType="picture"  :fileList="fileListPc"  :maxpic='maxpic' :clean="!isDialogVisible" )
+      el-form-item(label="游戏支持设备" prop="device")
+        el-radio-group(v-model="dialogform.device" :disabled="!dialogType")
+          el-radio(label="0") 不限制
+          el-radio(label="1") PC
+          el-radio(label="2") H5
+    .dialog-footer(slot="footer")
+      el-button(@click="onResetFields" size="small") 取 消
+      el-button(type="primary" @click="onDialogSaveClick" :loading="isSaveLoading" size="small") 保 存

@@ -1,0 +1,30 @@
+.report-download
+  //- 数据筛选
+  .filter
+    el-form.form(:model="form" :inline="true" size="small" @keyup.enter.native="onQueryClick")
+      el-form-item(label="菜单模块")
+        el-select(v-model="form.menu" placeholder="请选择" @change="onModuleChange")
+          el-option(label="全部", value="")
+          el-option(v-for="item in module" :key="`${item.id}${item.name}`" :label="item.name" :value="String(item.id)")
+      el-form-item(label="子模块")
+        el-select(v-model="form.subMenu" placeholder="请选择")
+          el-option(label="全部", value="")
+          el-option(v-for="item in availableSubModules" :key="`${item.id}${item.name}`" :label="item.name" :value="String(item.id)")
+      el-form-item
+        el-button(type="primary" @click="onQueryClick") 查询
+
+  //- 表格
+  .table
+    el-table.tabel(:data="tableData" stripe border style="width: 100%" v-loading="isLoading" ref="multipleTable")
+      el-table-column(
+        align="center" 
+        v-for="item, index in tableHead"
+        :key="item.index"
+        :label="item.label"
+        :prop="item.prop"
+        :width="item.width"
+        :min-width="item.minWidth"
+        :formatter="item.formatter"
+        :fixed="item.fixed")
+    el-pagination.pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+    p.instruction 注：导出数据30秒统计一次，若有多条导出数据，按导出时间排队统计。

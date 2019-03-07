@@ -1,0 +1,11 @@
+.login
+  .panel
+    .title 总后台管理系统
+      el-form.content(:model="form" :rules="rules" ref="form")
+        el-form-item(prop="username")
+          el-input(type="text" v-model="form.username" placeholder="请输入用户名" @keyup.enter.native="onEnterClick")
+        el-form-item(prop="password")
+          el-input(type="password" v-model="form.password" placeholder="请输入密码" @keyup.enter.native="onEnterClick")
+        el-form-item 
+          el-checkbox.checkbox(v-model="isRememberUsername") 记住用户名
+          el-button.btn-login(type="primary" :loading="isLogining" @click="onLoginClick" @keyup.13="onLoginClick") 登 录

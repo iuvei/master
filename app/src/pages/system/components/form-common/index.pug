@@ -1,0 +1,34 @@
+.form-common
+  el-form(:model="form" :inline="isInline" size="small" ref="form" :label-position="'right'" :rules="rules" :label-width="isInline?'':'85px'")
+    el-form-item(v-for="i,index in item.formItems" :key="index" :label="i.label" :prop="i.prop" )
+      template(v-if="i.type==='input'")
+        el-input(v-model="form[i.prop]" :placeholder="i.placeholder" :key="index" :style="{width:item.btns?'130px':'100%'}" :disabled="i.disabled" :class="i.class")
+      
+      template(v-else-if="i.type==='select'")
+        el-select(v-model="form[i.prop]" :placeholder="i.placeholder" :disabled="i.disabled" :filterable="i.filterable" :clearable="i.clearable" :style="{width:i.width?i.width:'140px'}")
+          el-option(v-for="item in i.options" :key="item.value" :label="item.label" :value="item.value")
+      
+      template(v-else-if="i.type==='select-search'")
+        el-select(
+          v-model="form[i.prop]" 
+          :multiple="false"
+          :filterable="true" 
+          remote 
+          clearable
+          :placeholder="i.placeholder" 
+          :disabled="i.disabled"
+          :remote-method="i.remoteMethod"
+          :loading="i.loading"
+        )
+          el-option(v-for="item in i.options" :key="item.value" :label="item.name" :value="item.id")
+
+      template(v-else-if="i.type==='date'")
+        day-picker(v-model="form[i.prop]" :defaultValue="i.default" :key="index" )
+
+      template(v-else-if="i.type==='fourCheckbox'")
+        four-checkbox(:options="i.options" :key="index" :isAllIndeterminated="i.isAllIndeterminated" :isAllSelected="i.isAllSelect" :disabled="i.disabled")
+      
+      template(v-else-if="i.type==='checkboxGroup'")
+        el-checkbox(v-for="opt,key in i.options" :key="key" v-model="opt.value" :disabled="i.disabled") {{opt.desc}}
+    el-form-item.btn
+      el-button(v-for="i,index in item.btns" :type="i.type" :key="index" @click.stop.prevent="btnFun(i)" v-if="i.isShow") {{i.label}}

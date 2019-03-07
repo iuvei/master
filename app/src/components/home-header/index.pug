@@ -1,0 +1,38 @@
+.header
+  .logo(:style="isMeunCollapse ? {width: '64px', color: 'transparent'} : null")
+    a(href="javascript:;")
+      i.iconfont.icon-tingzhu
+      strong 总后台管理系统
+  .right
+    .toggle(@click.prevent="onToggleClick")
+      i(:class="isMeunCollapse ? 'el-icon-arrow-right' : 'el-icon-arrow-left'")
+    .time(v-if="timeZone.value") {{ dateFormat }}
+    .menu
+      el-button.btn(type="text" @click="toggleFullScreen") 全屏
+      el-button.btn(type="text" @click="onSettingClick") 设置
+      el-dropdown(trigger="click" @command="onAdminClick")
+        .el-dropdown-link
+          span {{ username }}
+          i.el-icon-arrow-down.el-icon--right
+        el-dropdown-menu(slot="dropdown")
+          el-dropdown-item(command="password") 修改密码
+          el-dropdown-item(command="logout") 登出
+      el-button.btn(type="text" @click="$router.push('/report-download')") 数据下载
+      el-badge(:value="warningNumber"  class="item")
+        el-button.btn(type="text" @click="onWarningNumber") 消息
+      audio(id="transfer" :src="require('./audio/transfer.mp3')")
+      el-button.btn(v-for="item, index in btns" :key="index" type="text" @click="$router.push(item.path)") {{ item.label }}
+
+  home-setting(:visible="isSettingVisible" ref='homeSetting' @requestAudio="requestAudio")
+
+  el-dialog(title="修改密码" width="30%" :visible.sync="isDialogVisible" append-to-body :close-on-click-modal="false")
+    el-form(:model="formPassword" :rules="rulesPassword" ref="formPassword" size="small" label-width="80px")
+      el-form-item(label="旧密码" prop="oldPassword")
+        el-input(v-model="formPassword.oldPassword" type="password" @keyup.enter.native="onEnterClick")
+      el-form-item(label="新密码" prop="newPassword")
+        el-input(v-model="formPassword.newPassword" type="password" @keyup.enter.native="onEnterClick")
+      el-form-item(label="确认密码" prop="newPassword2")
+        el-input(v-model="formPassword.newPassword2" type="password" @keyup.enter.native="onEnterClick")
+    .dialog-footer(slot="footer")
+      el-button(@click="isDialogVisible = false") 取 消
+      el-button(type="primary" @click="onDialogSaveClick" :loading="isSaveLoading") 保 存

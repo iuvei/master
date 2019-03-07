@@ -1,0 +1,38 @@
+.maintain-setting
+  //- 筛选条件
+  .filter
+    el-form(:model="filterForm" ref="filterFormRef" :inline="true" size="small")
+      el-form-item(label="厅主名称")
+        el-select(v-model="filterForm.hall_id" placeholder="请输入厅主名称" clearable filterable)
+          el-option(v-for="item,key in usernameAll" :key="key" :label="item.label" :value="item.value")
+      el-form-item
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+    //- 批量操作区
+    div.batch-wrapper(:class="{ active: maintainForm.multipleSelection.length && isBundleOperationAllowed && unauthorizedBtnDic.maintain }")
+      el-form
+        el-form-item
+          span(style="margin-right: 10px") 已选择
+            span.text_success {{maintainForm.multipleSelection.length}}
+            | 条数据
+          el-button(type="success" size="small" @click="isMaintainTimeVisible = true") 批量操作
+  //- 表格
+  .table
+    //- 数据列表
+    el-table.tabel(:data="tableData" stripe border style="width: 100%" v-loading="isLoading" ref="multipleTable" @selection-change="handleSelectionChange")
+      el-table-column(type="selection" width="55" fixed="left" v-if="unauthorizedBtnDic.maintain")
+      el-table-column(align="center" v-for="item, index in tableHead" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+    el-pagination.pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+  //- Dialogs-设置维护时间
+  el-dialog(title="设置维护起止时间" :visible.sync="isMaintainTimeVisible" width="540px" :close-on-click-modal="false" @closed="resetDialog")
+    el-form(:model="maintainForm" size="small" label-width="100px" ref="maintainForm" :rules="rules")
+      el-form-item(label="已选厅主" v-if="isInConfirmMode")
+        el-checkbox(v-for="item in maintainForm.multipleSelection" :key="`${item.id}_${item.company_name}`" checked disabled) {{item.company_name}}
+      el-form-item(label="维护时间" prop='days')
+        DateTimePicker(v-model="maintainForm.days" :disabled="isInConfirmMode" clearable)
+      el-form-item(v-if="isInConfirmMode && maintainForm.days[1]")
+        span 确认对以上厅开始维护吗？
+    span(slot="footer" class="dialog-footer")
+      el-button(size="small" type="cancel" @click="isMaintainTimeVisible = false") 取消
+      el-button(size="small" type="primary" @click="updateMaintainTime" v-if="isInConfirmMode") 确定
+      el-button(size="small" type="primary" @click="onClickSave('maintainForm')" v-else) 保存

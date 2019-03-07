@@ -1,0 +1,50 @@
+div
+  .filter
+    el-form(:model="form" :inline="true" size="small")
+      el-form-item(label="游戏类型")
+        el-select(v-model="form.game_type" placeholder="请选择" @change='change')
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+    el-form
+      el-button(size='small'  style="margin:0 20px 20px 20px" type='success' @click='onAddClick' v-if='unauthorizedBtnDic.id_5') 新增标签
+
+  .table(style="position:relative")
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      el-table-column(align="center" v-for="item, index in tableHead" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+      el-table-column(align="center" label="操作")
+          template(slot-scope="scope")
+            el-button(type='text' @click='edit(scope.row)' v-if='unauthorizedBtnDic.id_4 && !scope.row.is_default') 编辑
+            el-button(type='text'  @click='delect(scope.row)' v-if='unauthorizedBtnDic.id_6 && !scope.row.is_default') 删除
+    //- el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+
+  
+  el-dialog.dialog(title="编辑游戏标签" width='400px' :visible.sync="isDialogVisible" :close-on-click-modal="false")
+    el-form(:model="dialogform" labelWidth='80px' size="small" ref="dialogForm")
+      el-form-item(label="游戏类型" prop="game_type" )
+        el-select(v-model="dialogform.game_type" placeholder="请选择" disabled)
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="标签名称" prop="name"  :rules="[{ required: true, message: '必填字段' },{ min: 2, max: 10, message: '长度不小于2个且不超过10个字', trigger: 'blur' }]")
+        el-input(:rows="2" v-model="dialogform.name" )
+    .dialog-footer(slot="footer")
+      el-button(@click="isDialogVisible = false") 取 消
+      el-button(type="primary" @click="onDialogEdit('dialogForm')" :loading="isSaveLoading") 保 存
+
+  
+  el-dialog.dialog(title="新增游戏标签" width='400px' :visible.sync="visiblea" :close-on-click-modal="false" @close='onResetFields')
+    el-radio-group(v-model="level" style="margin:0 0 30px 60px;")
+      el-radio-button( label="one-level") 新增一级标签
+      el-radio-button( label="tow-level") 新增二级标签
+    el-form(:model="dialogadd" labelWidth='120px' size="small" ref="dialogadd")
+      el-form-item(label="游戏类型" prop="game_type"  :rules="[{ required: true, message: '必填字段' }]")
+        el-select(v-model="dialogadd.game_type" placeholder="请选择" @change='changeType')
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="标签名称" prop="name" v-if='level=="one-level"' :rules="[{ required: true, message: '必填字段' },{ min: 2, max: 10, message: '长度不小于2个且不超过10个字', trigger: 'blur' }]")
+        el-input(:rows="2" v-model="dialogadd.name" )
+      el-form-item(label="一级标签名称" prop="onelevel" v-if='level=="tow-level"'  :rules="[{ required: true, message: '必填字段' }]")
+        el-select(v-model="dialogadd.onelevel" placeholder="请选择")
+          el-option(v-for="item in allTag" :key="item.id" :label="item.name" :value="item.id")
+      el-form-item(label="二级标签名称" prop="towlevel" v-if='level=="tow-level"'  :rules="[{ required: true, message: '必填字段' },{ min: 2, max: 10, message: '长度不小于2个且不超过10个字', trigger: 'blur' }]")
+        el-input(:rows="2" v-model="dialogadd.towlevel" )
+
+    .dialog-footer(slot="footer")
+      el-button(@click="visiblea = false") 取 消
+      el-button(type="primary" @click="onDialogEdit('dialogadd')" :loading="isSaveAdd") 保 存

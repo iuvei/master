@@ -1,0 +1,53 @@
+.account-settings-container
+  .filter
+    el-form(:model="form" :inline="true" size="small" @keyup.enter.native="onQueryClick" @submit.native.prevent)
+      el-form-item(label="管理员账号")
+        el-input(v-model="form.username")
+      el-form-item.btn
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+        el-button(v-if="unauthorizedBtnDic.add" type="success" @click="onAddClick") 新增管理员
+
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      template(v-for="item,index in columns")
+        el-table-column(align="center" :key="index" :label="item.name")
+          template(slot-scope="scope")
+            div(@click="item.click && item.click(scope.row)" v-html="item.processor ? item.processor(scope.row) : scope.row[item.prop]")
+      el-table-column(align="center" label="操作" width="200")
+        template(slot-scope="scope")
+          el-button(type="text" size="small" v-if="unauthorizedBtnDic.reversal && scope.row.status === 0" @click="onStartClick(scope.row)") 启用
+          el-button(type="text" size="small" v-if="unauthorizedBtnDic.reversal && scope.row.status === 1" @click="onStopClick(scope.row)") 停用
+          el-button(type="text" size="small" v-if="unauthorizedBtnDic.edit" @click="onEditClick(scope.row)") 修改
+          el-button(type="text" size="small" v-if="unauthorizedBtnDic.delete" @click="onDeleteClick(scope.row)") 删除
+          el-button(type="text" size="small" v-if="unauthorizedBtnDic.edit" @click="onEditClick(scope.row, true)") 改密
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+  el-dialog(:title="dialog.title" width="30%" :visible.sync="dialog.visible" :close-on-click-modal="false")
+    .account-settings-dialog-container
+      el-form.form(:model="dialog.form" :rules="dialog.rules" size="small" ref="editForm")
+        el-form-item(prop="username" label="账号" label-width="100px" required)
+          el-input(v-model="dialog.form.username" clearable :readonly="dialog.isEdit || dialog.isUpdatePwd")
+        el-form-item(prop="password" label="密码" label-width="100px" required)
+          el-input(v-model="dialog.form.password" type="password" clearable @focus="passwordFocus" @blur="passwordBlur")
+        el-form-item(prop="password_confirmation" label="确认密码" label-width="100px" required)
+          el-input(v-model="dialog.form.password_confirmation" type="password" clearable @focus="passwordConfirmFocus" @blur="passwordConfirmBlur")
+        el-form-item(prop="truename" label="姓名" label-width="100px" v-if="!dialog.isUpdatePwd")
+          el-input(v-model="dialog.form.truename" clearable)
+        el-form-item(prop="part" label="部门" label-width="100px" v-if="!dialog.isUpdatePwd")
+          el-input(v-model="dialog.form.part" clearable)
+        el-form-item(prop="job" label="职位" label-width="100px" v-if="!dialog.isUpdatePwd")
+          el-input(v-model="dialog.form.job" clearable)
+        el-form-item(prop="login_limit" label="登录ip限制" label-width="100px" required v-if="!dialog.isUpdatePwd")
+          el-radio-group(v-model="dialog.form.login_limit")
+            el-radio(:label="0") 无限制
+            el-radio(:label="1") 白名单ip
+        el-form-item(v-if="!dialog.isUpdatePwd && dialog.form.login_limit === 1" prop="white_list" label-width="100px")
+          el-input(v-model="dialog.form.white_list" type="textarea" :rows="3" placeholder="请输入白名单IP，如有多个用英文逗号隔开")
+        el-form-item(prop="expire_time" label="有效期至" label-width="100px" required v-if="!dialog.isUpdatePwd")
+          el-date-picker(v-model="dialog.form.expire_time" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间")
+        el-form-item(prop="role" label="角色权限" label-width="100px" required v-if="!dialog.isUpdatePwd")
+          el-radio-group(v-model="dialog.form.role")
+            el-radio(v-for="role,index in roles" :key="role.id" :label="role.id") {{role.role}}
+    .dialog-footer(slot="footer")
+      el-button(@click="dialog.visible = false") 取 消
+      el-button(type="primary" @click="onSaveClick") 保 存

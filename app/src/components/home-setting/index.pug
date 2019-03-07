@@ -1,0 +1,8 @@
+transition(name="slide-fade")
+  .home-setting(v-setting v-show="visible")
+    .title 声音设置
+    .content 
+      span 消息提示
+      el-switch.sound-switch(v-model="isSoundEnabled")
+    .title 语言设置
+    language

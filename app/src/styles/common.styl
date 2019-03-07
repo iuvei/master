@@ -1,0 +1,88 @@
+// 定义全局共用的样式
+// -- 清除浮动
+.clearfix
+  &:after
+    clear both
+    display block
+    width 0
+    height 0
+    padding 0
+    margin 0
+    content ''
+
+// 内容框
+.frame
+  padding 20px
+  margin 15px 15px 10px 15px
+  background #fff
+  border 1px solid #dfdfdf
+  -webkit-box-shadow 0 2px 4px 0 rgba(0, 0, 0, 0.12), 0 0 6px 0 rgba(0, 0, 0, 0.04)
+  box-shadow 0 2px 4px 0 rgba(0, 0, 0, 0.12), 0 0 6px 0 rgba(0, 0, 0, 0.04)
+
+// 过滤框
+.filter
+  padding-top 18px
+  padding-right 20px
+  padding-left 20px
+  margin 15px 15px 10px 15px
+  background #fff
+  border 1px solid #dfdfdf
+  display flex
+  justify-content space-between
+
+  .el-form--inline .el-form-item
+    padding-left 0px
+    margin-right 40px
+
+    &:nth-last-child(2)
+      margin-right 12px
+
+    &.query
+      .el-button+.el-button
+        margin-left 12px
+
+// 表格框
+.table
+  margin 10px 15px
+
+// -- 点点点loading效果
+.dot
+  display inline-block
+  height 1em
+  line-height 1
+  text-align left
+  vertical-align -0.25em
+  overflow hidden
+
+.dot::before
+  display block
+  content '...\A..\A.'
+  white-space pre-wrap
+  /* 也可以是white-space: pre */
+  animation dot 3s infinite step-start both
+
+.no-permission-text
+  color #c0c4cc !important
+
+.no-permission-btn
+  background-color #c0c4cc !important
+
+// 金额及状态颜色
+.text_success
+  color #3cbf55
+
+.text_fail
+  color #ee5665
+
+.text_link
+  color #3f94f4
+
+.warning_text
+  color #e6a23c
+
+@keyframes dot
+  33%
+    transform translateY(-2em)
+
+  66%
+    transform translateY(-1em)

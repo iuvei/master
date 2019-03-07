@@ -1,0 +1,45 @@
+.api-statement-container
+  .filter
+    el-form(:model="form" :inline="true" size="small" @keyup.enter.native="onQueryClick" @submit.native.prevent)
+      el-row
+        el-form-item(label="时间")
+          day-picker(v-model="days" :defaultValue="[0,0]" ref="dayPicker")
+        el-form-item(label="厅主名称")
+          el-select(v-model="form.hall_id" filterable placeholder="请输入厅主名称" clearable)
+            el-option(v-for="item in companys" :value="item.key" :key="item.key" :label="item.label")
+        el-form-item.btn
+          el-button(type="primary" @click="onQueryClick") 查询
+          el-button(@click="onResetClick") 重置
+          el-button(type="primary" @click="onDownloadClick" v-if="unauthorizedBtnDic.export") 导出
+      el-row
+        el-form-item(label="游戏类别")
+          .checkbox-group
+            el-checkbox(v-for="item,index in gameTypeParents" :key="index" v-model="item.checked" :indeterminate="item.isIndeterminate" @change="(value) => handleCheckAllChange(item, value)") {{item.name}}
+          el-checkbox-group(v-model="gameTypeActive" @change="checkGameType")
+            el-checkbox(v-for="item,index in gameTypes" :label="item.index" :key="index") {{item.game_name}}
+
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading" :span-method="spanMethod" sortable="custom" @sort-change="sortChange" ref="table")
+      el-table-column(prop="timezone" label="时间类型" align="center")
+      el-table-column(prop="report_type" label="api统计时间" align="center")
+      el-table-column(prop="partner_name" label="游戏类别" align="center")
+      el-table-column(label="厅主名称" prop="company_name" align="center")
+      el-table-column(prop="bet_amount" :render-header="renderHeader('bet_amount')" align="center" sortable="custom")
+        template(slot-scope="scope")
+          .right {{$toThousands(scope.row.bet_amount)}}
+      el-table-column(prop="validbet" :render-header="renderHeader('validbet')" align="center" sortable="custom")
+        template(slot-scope="scope")
+          .right {{$toThousands(scope.row.validbet)}}
+      el-table-column(prop="bet_number" :render-header="renderHeader('bet_number')" align="center" sortable="custom")
+        template(slot-scope="scope")
+          .right {{scope.row.bet_number || 0}}
+      el-table-column(prop="contribute_amount" :render-header="renderHeader('contribute_amount')" align="center" sortable="custom")
+        template(slot-scope="scope")
+          .right {{$toThousands(scope.row.contribute_amount)}}
+      el-table-column(prop="bonus_amount" :render-header="renderHeader('bonus_amount')" align="center" sortable="custom")
+        template(slot-scope="scope")
+          .right {{$toThousands(scope.row.bonus_amount)}}
+      el-table-column(prop="profit" label="会员输赢" align="center" sortable="custom")
+        template(slot-scope="scope")
+          .right(:class="{red: scope.row.profit < 0, green: scope.row.profit > 0}") {{$toThousands(scope.row.profit)}}
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)

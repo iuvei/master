@@ -1,0 +1,7 @@
+el-row.home
+  home-header
+  el-col.main(:span="24")
+    home-menu
+    section
+      router-view(v-if="subscriptionAllRight")
+      .footer 皇朝 HC © 2019 版权所有

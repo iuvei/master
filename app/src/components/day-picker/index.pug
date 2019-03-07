@@ -1,0 +1,9 @@
+el-date-picker(
+  v-model="days"
+  size="small"
+  type="daterange"
+  value-format="yyyy-MM-dd"
+  start-placeholder="起止日期"
+  end-placeholder="结束日期"
+  :picker-options="pickerOptions"
+  @change="onChange")

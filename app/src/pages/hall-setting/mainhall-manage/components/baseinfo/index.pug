@@ -1,0 +1,14 @@
+el-dialog(:visible.sync="dialogVisible" title="客户基本资料" width="670px" :close-on-click-modal="false")
+  el-form(size="small" :model="form" ref="form" label-width="140px")
+    el-row
+      el-col(:span="item.prop === 'remark'?24:12" v-for="item,index in formList" :key="index")
+        el-form-item(:label="item.label" :prop="item.prop" :rules="item.rules")
+          el-input(v-if="item.type==='text'" v-model="form[item.prop]" :disabled="item.disabled || !disabled")
+          el-input(v-if="item.type==='group'" v-model="form['agent_count']+'/'+form['user_count']" :disabled="item.disabled || !disabled")
+          el-input(v-if="item.prop==='emergency_code'" v-model="form[item.prop]" :disabled="item.disabled || !disabled" :placeholder="'请输入'+form.emergency")
+          el-select(v-if="item.type==='select'" v-model="form[item.prop]" :disabled="!disabled")
+            el-option(v-for="item,index in emergencyList" :key="index" :label="item" :value="item")
+          el-input(v-if="item.type==='textarea'" type="textarea" v-model="form[item.prop]" :disabled="item.disabled || !disabled")
+  .dialog-footer(slot="footer")
+    el-button(size="small" @click="dialogVisible = false") 取消
+    el-button(size="small" type="primary" @click="submit" :disabled="!disabled") 确定

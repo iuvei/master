@@ -1,0 +1,70 @@
+div.transfer
+  .filter
+    el-form(:model="form" :inline="true" size="small" ref="formData")
+      el-form-item(label="厅主名称")
+        el-select(v-model="form.hall_id" placeholder="请输入厅主名称" filterable clearable)
+          el-option(v-for="item in hallList" :key="item.key" :label="item.label" :value="item.key")
+      el-form-item(label="用户名")
+        el-input(v-model="form.username" )
+      el-form-item(label="转账金额" prop='amount_from' :rules="[{ validator:validate, trigger: 'change' }]")
+        el-input.line(v-model="form.amount_from" type='number')
+        el-input.line(v-model="form.amount_to" type='number')
+      el-form-item(label="转账时间")
+        datetime-picker(v-model="days"  ref="dayPicker")
+      el-form-item(label="转出")
+        el-select(v-model="form.out_id" placeholder="请选择")
+          el-option(v-for="item in walletList" :key="item.partner_id" :label="item.show_name||item.partner_name" :value="item.partner_id")
+      el-form-item(label="转入")
+        el-select(v-model="form.in_id" placeholder="请选择")
+          el-option(v-for="item in walletList" :key="item.partner_id" :label="item.show_name||item.partner_name" :value="item.partner_id")
+      el-form-item.btn
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+  
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      el-table-column(align="center" v-for="item, index in tableHead" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+      el-table-column(label="状态" align="center")
+        template(slot-scope="scope")
+          span(class="text_fail") {{scope.row.status_des}}
+      el-table-column(label="操作" align="center")
+        template(slot-scope="scope")
+          el-button(v-if="unauthorizedBtnDic.handle" @click="supplement(scope.row)" size='small' type='text') {{scope.row.handle_type==1 ? '补单检测':'手动处理'}}
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+
+  
+  el-dialog(:title="'额度转账补单'"   width='600px'  :visible.sync="isDialogVisible"  @close='onResetFields' :close-on-click-modal="false")
+    el-form(:model="dialogform" labelWidth='120px'   size="small" ref="dialogForm")
+      el-form-item(label="厅主名称 ：")
+        span {{dialogform.company_name}}
+      el-form-item(label="用户名 ：")
+        span {{dialogform.username}}
+      el-form-item(label="转账金额 ：" )
+        div.text_fail {{dialogform.amount}}元
+      el-form-item(label="" )
+        div {{dialogform.out_type}} 转入 {{dialogform.in_type}}
+      el-form-item(label="转账时间 ：" )
+        span {{dialogform.updated_at}}
+      el-tabs(v-model="activeName" @tab-click="handleClick" v-if='dialogform.result_type && dialogform.result_type==2')
+        el-tab-pane(label="第三方5分钟内多笔订单" name="thirdParty") 
+        el-tab-pane(label="平台5分钟内多笔订单" name="platform")
+      el-table(:data="dialogtableData" stripe border style="width: 100%" v-loading="isLoading"  v-if='dialogform.result_type && dialogform.result_type==2')
+        el-table-column(label="厅主订单" align="center")
+          template(slot-scope="scope")
+            span() {{activeName=='thirdParty' ? scope.row.partner_order_number:scope.row.order_number }}
+        el-table-column(align="center" v-for="item, index in dialogtableHead" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+        el-table-column(label="状态" align="center" width='80px')
+          template(slot-scope="scope")
+            span(:class="scope.row.status_des=='成功' ? 'text_success':'text_fail'") {{scope.row.status_des}}
+      el-form-item(label="检测结果 ："  prop='status' :rules="[{ required: true, message: '必选字段', trigger:'change' }]")
+        span(v-if='dialogform.status && dialogform.result_type && dialogform.result_type==1' :class="dialogform.status==1 ? 'text_success':'text_fail'") {{dialogform.status==1 ? '转账成功':'转账失败'}}
+        el-radio-group(v-model="dialogform.status" v-if='dialogform.result_type==2|| !dialogform.result_type')
+          el-radio(:label=1) 转账成功
+          el-radio(:label=2) 转账失败
+      el-form-item(label="结果说明 ：")
+        span.warning_text(v-if='dialogform.result_des') {{dialogform.result_des}}
+      el-form-item(label="备注" prop='remark' :rules="[{ max: 50, message: '备注不超过50字段', trigger:'change' }]" )
+        el-input(type='textarea' v-model="dialogform.remark")
+    .dialog-footer(slot="footer")
+      el-button(@click="onResetFields") 取 消
+      el-button(type="primary" @click="onDialogSaveClick" :loading="isSaveLoading") 保 存

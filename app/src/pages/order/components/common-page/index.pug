@@ -1,0 +1,29 @@
+div
+  .filter
+    el-form(:inline="true" size="small" :model="form" ref="form")
+      el-form-item(label="时间类型")
+        el-select(v-model="timezone" @change="changeTimezone")
+          el-option(v-for="item,index in timezones" :key="index" :label="item.label" :value="item.value")
+      el-form-item
+        el-select(v-model="date_type" style="margin-right:5px")
+          el-option(v-for="item in options" :key="item.value" :label="item.label" :value="item.value")
+        datetime-picker(v-model="days" :defaultValue="[0,0]" :timezone="timezone")
+      el-form-item(label="厅主名称")
+        el-select(v-model="form.hall_id" filterable clearable placeholder="请输入厅主名称")
+          el-option(v-for="item in companys" :value="item.key" :key="item.key" :label="item.label")
+      el-form-item(label="会员账号")
+        el-input(v-model="form.member_name" placeholder="请输入会员账号")
+      el-form-item(label="注单号")
+        el-input(v-model="form.order_number" placeholder="请输入注单号")
+      el-form-item(v-for="item,key in formAddList" :key="key" :label="item.label")
+        el-select(v-if="item.type === 'select'" v-model="form[key]" placeholder="请选择")
+          el-option(v-for="option in item.list" :key="option.value" :label="option.label" :value="option.value")
+        el-input(v-else v-model="form[key]"  :placeholder='"请输入"+item.label')
+      el-form-item.query
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+        el-button(v-if="unauthorizedBtnDic.id_1" type="primary" @click="onDownloadClick") 导出
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading" :span-method="arraySpanMethod")
+      el-table-column(align="center" v-for="item,index in tableHead"  v-if="!item.hidden" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)

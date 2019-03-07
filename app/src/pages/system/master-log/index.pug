@@ -1,0 +1,14 @@
+div
+  .filter
+    form-common(:form="filterForm" :item="filterItem")
+
+  .table
+    table-common(
+      :tableData="tableData" 
+      :tableHead="tableHead" 
+      :paginationObj="paginationObj"  
+      v-loading="isLoading"
+      @changeSizeAndPage="changeSizeAndPage"                  
+    )
+  
+  detail-dialog(:dialogConfig="dialogConfig" :roleDialog="roleDialog")

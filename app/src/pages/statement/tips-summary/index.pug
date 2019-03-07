@@ -1,0 +1,6 @@
+div
+  el-tabs(v-model="activeName" type="border-card" @tab-click="handleClick")
+    el-tab-pane(label="红包" name="bonus")
+      common(type="bonus" v-if="activeName === 'bonus'" exportModuleKeyName="REPORT_REDPACKET" :unauthorizedBtnDic="unauthorizedBtnDic")
+    el-tab-pane(label="小费" name="tips")
+      common(type="tips" v-if="activeName === 'tips'" exportModuleKeyName="REPORT_TIPS" :unauthorizedBtnDic="unauthorizedBtnDic")

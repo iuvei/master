@@ -1,0 +1,69 @@
+div
+  .filter
+    el-form(:model="filterForm" ref="filterFormRef" :inline="true" size="small")
+      el-form-item(label="发送人")
+        el-select(v-model="filterForm.user_id" placeholder="请选择" clearable filterable)
+          el-option(v-for="item,key in sendUserAll" :key="key" :label="item.username" :value="item.id")
+      el-form-item(label="接收对象")
+        el-select(v-model="filterForm.hall_id" placeholder="请选择" clearable filterable)
+          el-option(v-for="item,key in acceptObjeAll" :key="key" :label="item.label" :value="item.value")
+      el-form-item(label="消息类型")
+        el-select(v-model="filterForm.type" placeholder="请选择" clearable)
+          el-option(v-for="item,key in typeAll" :key="item.value + key" :label="item.label" :value="item.value")
+      el-form-item(label="发送时间")
+        datetimePicker(v-model="days" ref="dayPicker")
+      el-form-item.btn
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetFilter") 重置
+        el-button(v-if="unauthorizedBtnDic.send" type="success" @click="onAdd") 发送消息
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      el-table-column(align="center" label="消息标题"  prop="title")
+      el-table-column(align="center" label="消息类型"  prop="type" :formatter="formatterType")
+      el-table-column(align="center" label="接收对象"  prop="hall_name")
+      el-table-column(align="center" label="发送时间"  prop="created_at")
+      el-table-column(align="center" label="发送人"    prop="master_username")
+      el-table-column(align="center" label="发布状态"  prop="status")
+        template(slot-scope="scope")
+          span(:class="scope.row.status==1 ? 'text_success':'text_fail'") {{scope.row.status==1 ? '已发布':'已撤回'}}
+      el-table-column(align="center" label="消息状态" )
+        template(slot-scope="scope")
+          el-tag(@click.native="onMessage(scope.row)" style="cursor:pointer") {{scope.row.see+'/'+scope.row.sum}}
+      el-table-column(align="center" label="操作" width="300")
+        template(slot-scope="scope")
+          el-button(type="primary" v-if="unauthorizedBtnDic.view" size="mini" @click="onLook(scope.row)") 查看
+          el-button(type="danger" v-if="unauthorizedBtnDic.withdraw" size="mini" @click="onDelete(scope.row)") 撤回
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+
+  
+  el-dialog(:title="dialogForm.dialogType=='add'? '发送消息':'查看消息'" width="550px" :visible.sync="isDialogVisible" @closed="onResetFields" :close-on-click-modal="false")
+    el-form(:model="dialogForm" labelWidth="120px" :rules="rules"  size="small" ref="dialogForm")
+      el-form-item(label="活动名称" prop="hall_id" v-if="dialogForm.dialogType=='add'")
+        el-checkbox(:indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange") 全选
+        div(style="margin: 15px 0;")
+        el-checkbox-group(v-model="dialogForm.hall_id" @change="handleCheckedCitiesChange")
+          el-checkbox(v-for="item,index in acceptObjeAll" :label="item.value" :key="item.value") {{item.label}}
+      el-form-item(label="消息类型" prop="type")
+        el-select(v-model="dialogForm.type" placeholder="请选择" :disabled="dialogForm.dialogType!='add'")
+          el-option(v-for="item in typeAll" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="发送时间" prop="time" v-if="dialogForm.dialogType!='add'")
+        el-input(v-model="dialogForm.time"  :disabled="dialogForm.dialogType!='add'")
+      el-form-item(label="消息标题" prop="title")
+        el-input(v-model="dialogForm.title"  :disabled="dialogForm.dialogType!='add'")
+      el-form-item(label="消息内容" prop="content")
+        el-input(v-model="dialogForm.content" type="textarea"  :disabled="dialogForm.dialogType!='add'")
+    .dialog-footer(slot="footer")
+      el-button(@click="isDialogVisible=false") 取 消
+      el-button(type="primary" @click="onDialogSaveClick" v-if="dialogForm.dialogType=='add'" :loading="isSaveLoading") 发 送
+
+  el-dialog(title="消息状态" width="550px" :visible.sync="visible" :close-on-click-modal="false")
+    el-form(:model="dialogStatus" labelWidth="120px" size="small" ref="dialogForm")
+      el-form-item(label="未接收客户")
+        span {{dialogStatus.receivedNumber}}
+        el-input(v-model="dialogStatus.received.join(',')" type="textarea" disabled)
+      el-form-item(label="已接收客户")
+        span {{dialogStatus.unreceivedNumber}}
+        el-input(v-model="dialogStatus.unreceived.join(',')" type="textarea" disabled)
+    .dialog-footer(slot="footer")
+      el-button(@click="visible=false") 取 消
+      el-button(type="primary" @click="onReset" :loading="isSaveLoading") 刷 新

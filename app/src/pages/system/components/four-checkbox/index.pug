@@ -1,0 +1,42 @@
+.four-checkbox
+  el-checkbox(v-model="isAllSelect" @change="handleCheckAllChange" :indeterminate="isAllIndeterminate" :disabled="disabled") 全选
+  
+  .checkbox-group(v-for="group,groupIndex in optionData")
+    el-checkbox(
+      v-model="group.model" 
+      :key="groupIndex" 
+      @change="handleCheckGroupChange(groupIndex)" 
+      :indeterminate="group.indeterminate"
+      :disabled="disabled"
+    ) {{group.name}}
+
+    //- 
+    .checkbox-children(v-if="group.children"  v-for="child,childIndex in group.children" :style="{'display':getFlex(child)}")
+      el-checkbox(
+        v-model="child.model" 
+        :key="childIndex"
+        @change="handleCheckChildChange(groupIndex,childIndex)"     
+        :indeterminate="child.children?child.indeterminate:false"  
+        :disabled="disabled"  
+      ) {{child.name}}
+
+      div
+        .checkbox-inner(v-if="child.children" v-for="c,i in child.children" :class="{'float':!c.children}")
+          .line(v-if="!c.children&&!i")
+          el-checkbox(
+            v-model="c.model"
+            @change="handleCheckInnerChildChange(groupIndex,childIndex,i)" 
+            :indeterminate="c.children?c.indeterminate:false"  
+            :disabled="disabled"
+          ) {{c.name}}
+
+          .checkbox(v-if="c.children")
+            .line
+            el-checkbox(
+              v-for="cInner,iIner in c.children" 
+              v-model="cInner.model"
+              @change="handleCheckSingleChildChange(groupIndex,childIndex,i,iIner)" 
+              :key="iIner"
+              :label="cInner.name"
+              :disabled="disabled"
+            )

@@ -1,0 +1,33 @@
+div.transfer
+  .filter
+    el-form(:model="form" :inline="true" size="small" ref="formData")
+      el-form-item(label="厅主名称")
+        el-select(v-model="form.hall_id" placeholder="请输入厅主名称" filterable clearable)
+          el-option(v-for="item in hallList" :key="item.key" :label="item.label" :value="item.key")
+      el-form-item(label="用户名")
+        el-input(v-model="form.username" )
+      el-form-item(label="转账金额" prop='amount_from' :rules="[{ validator:validate, trigger: 'change' }]")
+        el-input.line(v-model="form.amount_from" type='number')
+        el-input.line(v-model="form.amount_to" type='number')
+      el-form-item(label="状态")
+        el-select(v-model="form.status" placeholder="请选择")
+          el-option(v-for="item in optionStatus" :key="item.status" :label="item.name" :value="item.status")
+      el-form-item(label="转账时间")
+        datetime-picker(v-model="days" :defaultValue="[0,0]" ref="dayPicker")
+      el-form-item(label="转出")
+        el-select(v-model="form.out_id" placeholder="请选择")
+          el-option(v-for="item in walletList" :key="item.partner_id" :label="item.show_name||item.partner_name" :value="item.partner_id")
+      el-form-item(label="转入")
+        el-select(v-model="form.in_id" placeholder="请选择")
+          el-option(v-for="item in walletList" :key="item.partner_id" :label="item.show_name||item.partner_name" :value="item.partner_id")
+      el-form-item.btn
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+  
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      el-table-column(align="center" v-for="item, index in tableHead" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+      el-table-column(label="状态")
+        template(slot-scope="scope")
+          span(:class="scope.row.status==1 ? 'text_success':'text_fail'") {{scope.row.status==1 ? '成功':'失败'}}
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)

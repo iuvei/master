@@ -1,0 +1,58 @@
+div.recom
+  .filter
+    el-form(:model="form" :inline="true" size="small")
+      el-form-item(label="状态")
+        el-select(v-model="form.status" placeholder="请选择")
+          el-option(v-for="item in optionStatus" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="游戏类型")
+        el-select(v-model="form.game_type" placeholder="请选择" @change='change')
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="游戏API")
+        el-select(v-model="form.partner_id" placeholder="请选择")
+          el-option(v-for="item in optionAPI" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item.btn
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+    el-form
+      el-button.addbtn(@click="addClick" type="success" v-if='unauthorizedBtnDic.id_1' size='small') 添加推荐游戏
+
+  .table(v-if="tableData&&tableData.length>0")
+    .zhu 注：推荐游戏对应设置【PC客户端】-电子游戏和棋牌游戏侧边导航栏钟【推荐游戏】的内容
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      template(v-for="item, index in tableHead")
+        el-table-column(align="center" :key="index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter" :render-header="item.renderHeader")
+      el-table-column(align="center" label="操作" width="300")
+          template(slot-scope="scope")
+            el-button(type="danger" v-if='scope.row.status&&unauthorizedBtnDic.id_2' size="mini" @click="disc(scope.row,0)") 停 用
+            el-button(type="success" v-if='!scope.row.status&&unauthorizedBtnDic.id_2' size="mini" @click="disc(scope.row,1)") 启 动
+            el-button(type="primary" size="mini" @click='edit(scope.row)' v-if='unauthorizedBtnDic.id_3') 编 辑
+            el-button(type="danger" size="mini"  @click='remove(scope.row)' v-if='unauthorizedBtnDic.id_4') 删 除
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+  
+  el-dialog(title="编辑" width='400px' :visible.sync="isDialogVisible" :close-on-click-modal="false" @close='onResetFields')
+    el-form(:model="dialogform" labelWidth='80px' :rules="rules"  size="small" ref="dialogForm")
+      el-form-item(label="游戏名称" prop='game_name')
+        el-input(v-model="dialogform.game_name" placeholder="请选择" :disabled="true")
+      el-form-item(label="游戏类型" prop='game_type')
+        el-select(v-model="dialogform.game_type" placeholder="请选择" :disabled="true")
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="游戏API" prop='show_name')
+        el-select(v-model="dialogform.show_name" placeholder="请选择" :disabled="true")
+          el-option(v-for="item in optionAPI" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="开始时间" prop='start_time')
+          el-date-picker(v-model="dialogform.start_time"  type="datetime" placeholder="选择日期")
+      el-form-item(label="结束时间" prop='end_time')
+          el-date-picker(v-model="dialogform.end_time"  type="datetime" placeholder="选择日期")
+      el-form-item(label="排序" prop='sort')
+        el-input(v-model="dialogform.sort" placeholder="请输入排序")
+      el-form-item(label="状态" prop='status')
+        el-select(v-model="dialogform.status" placeholder="请选择")
+          el-option(v-for="item in dialogStatus" :key="item.value" :label="item.label" :value="item.value")
+    .dialog-footer(slot="footer")
+      el-button(@click="isDialogVisible = false") 取 消
+      el-button(type="primary" @click="onDialogSaveClick" :loading="isSaveLoading") 保 存
+
+  .add(v-if="tableData&&tableData.length==0")
+    .recommend
+      span 暂无推荐游戏
+      el-button( size="medium " v-if='unauthorizedBtnDic.id_1' @click="addClick") + 添加推荐游戏

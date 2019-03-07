@@ -1,0 +1,49 @@
+.mainhall-manage
+  .filter
+    el-form(:inline="true" size="small" :model="filterForm" ref="filterFormRef")
+      el-form-item(label="厅主名称")
+        el-select(v-model="filterForm.hall_id" clearable filterable placeholder="请输入厅主名称")
+          el-option(v-for="item,index in hallNameList" :key="index" :label="item.name" :value="item.id")
+      el-form-item(label="账号状态")
+        el-select(v-model="filterForm.status" style="margin-right:5px" clearable filterable)
+          el-option(v-for="item in statusAll" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item.query
+        el-button(type="primary" @click="requestTable") 查询
+        el-button(@click="onResetFilter") 重置
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      el-table-column(align="center" v-for="item,index in tableHead" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+      el-table-column(align="left" label="操作" min-width="300")
+        template(slot-scope="scope")
+          el-button(v-if="unauthorizedBtnDic.game" type="text" size="small" @click="editGames(scope.row)") 游戏授权
+          el-button(v-if="unauthorizedBtnDic.nav" type="text" size="small" @click="setMenu(scope.row)") 导航栏设置
+          el-button(type="text" size="small" @click="editInfo(scope.row)") 资料
+          el-button(type="text" size="small" @click="editBase(scope.row)") 基础设置
+          el-button(v-if="unauthorizedBtnDic.free" type="text" size="small" @click="editMoney(scope.row)") 费用设置
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+  .dialog
+    el-dialog(:visible.sync="dialogVisible" :title="dialogTitle" width="670px" :close-on-click-modal="false")
+      el-form(size="small" :model="dialogForm" ref="dialogForm" label-width="130px")
+        el-form-item(v-if="dialogType === 'time'" label="正式运营时间")
+          el-date-picker(v-model="dialogForm.start_time" type="datetime" placeholder="选择日期时间")
+        div(v-else)
+          el-form-item(label="厅主名称")
+            el-input(v-model="dialogForm.company_name" type="text" disabled)
+          el-form-item
+            el-radio-group(v-model="dialogForm.type" size="small")
+              el-radio-button(label="1") 开启包底费
+              el-radio-button(label="2") 开启线路费
+          el-form-item(v-if="dialogForm.type === '1'" label="包底费用" prop="fee_monthly_amount" :rules="rules")
+            el-input(v-model="dialogForm.fee_monthly_amount" type="text")
+          el-form-item(v-if="dialogForm.type === '2'")
+            el-radio 
+            span 温馨提示：线路费手动输入，开启后厅主包网费就是按线路费交收，<br>详情请见“交收详情页”
+      .dialog-footer(slot="footer")
+        el-button(size="small" @click="dialogVisible = false") 取消
+        el-button(size="small" type="primary" @click="submit") 确定
+    //- 游戏授权
+    games(ref="games" :hall_id="nowHall")
+    //- 资料
+    baseinfo(ref="baseinfo" :hall_id="nowHall" :unauthorizedBtnDic="unauthorizedBtnDic.data")
+    //- 基础设置
+    base-setting(ref="baseSetting" :data="nowRow" :unauthorizedBtnDic="unauthorizedBtnDic.status")

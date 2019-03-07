@@ -1,0 +1,30 @@
+el-upload(
+  ref="upload"
+  :limit="limit"
+  :action="action"
+  :headers="headers"
+  :drag="drag"
+  :accept="accept"
+  :list-type="listType"
+  :file-list="fileList"
+  :on-success="onSuccess"
+  :on-error="onError"
+  :on-progress="onProgress"
+  :on-change="onChange"
+  :on-remove="onRemove"
+  :on-preview="onPreview"
+  :on-exceed="exceed"
+  :disabled="disabled"
+  :before-upload="beforeAvatarUpload"
+)
+  template(v-if="drag")
+    i.el-icon-upload
+    .el-upload__text
+      span 将文件拖到此处，或
+      em 点击上传
+  template(v-else)
+    el-button(size="small" v-if="pictext" type="primary") {{pictext}}
+    el-button(size="small"  v-if="!pictext" type="primary") 点击上传
+    span(v-if='sizeText' style='margin-left:10px;color:rgb(227,60,47)') 适用尺寸：{{sizeText}}
+  .el-upload__tip(slot="tip" v-if="maxpic") 只能上传 {{ accept }} 文件，且文件大小不能超过 {{maxpic}} MB
+  .el-upload__tip(slot="tip" v-if="!maxpic") 只能上传 {{ accept }} 文件，且文件大小不能超过 100 MB

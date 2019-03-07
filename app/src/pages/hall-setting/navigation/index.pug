@@ -1,0 +1,20 @@
+
+.navigation
+  .filter
+    el-form(:inline="true" size="small")
+      el-form-item.btn
+        el-button(type="primary" size="small" @click="back") 返回上一页
+      el-form-item(label="当期厅主：")
+        span {{hall.company_name}}
+  .frame.btnFrame    
+    .btns
+      el-button(type="primary" size="small" @click="saveChange") 保存
+      el-button(type="primary" size="small" @click='preview') 预览
+      el-button(v-if="activeName!=='h5'" type="primary" size="small" @click="addNavigation") 新增一级导航
+    el-tabs(v-model="activeName" @tab-click="handleClick")
+      el-tab-pane(label="PC端" name="pc")
+        setNavigation(v-if="activeName=='pc'" ref="pcSetNavigation" :hall="hall.id" type="pc" :tableHeadPc="tableHeadPc")
+      el-tab-pane(label="PC端电子导航栏" name="pcEle") 
+        setNavigation(v-if="activeName=='pcEle'" ref="pcSetNavigation" :hall="hall.id" type="pcEle" :tableHeadPc="tableHeadPcEleOrH5")
+      el-tab-pane(label="H5端" name='h5') 
+        setNavigation(v-if="activeName=='h5'" ref="setNavigation" :hall="hall.id" type="h5" :tableHeadPc="tableHeadPcEleOrH5")

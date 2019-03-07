@@ -1,0 +1,46 @@
+//- 详情弹框
+div
+  el-dialog.detail-dialog(
+    :title="dialogConfig.title"
+    :visible="dialogConfig.show"
+    :width="dialogConfig.type===3?'720px':dialogConfig.type===4?'800px':'480px'"
+    @close="dialogConfig.show=false"
+  ) 
+    //- -详情
+    template(v-if="dialogConfig.type===1")
+      div.type-1(v-for="value,key in dialogConfig.content")
+        p.key {{key}}:
+          span.content {{value}}
+
+    //- -新增  
+    template(v-else-if="dialogConfig.type===2")
+      div
+        .title
+        el-form(label-width="200px")
+          template(v-for="config,index in dialogConfig.content")
+            el-form-item(v-for="value,key in config" :label="key+':'" :key="index")
+              span {{value}} 
+    
+    //- -编辑
+    template(v-else-if="dialogConfig.type===3")
+      table.table
+        tr
+          td
+          td 修改前
+          td 修改后
+        tr(v-for="config,index in detailConfig")
+          template(v-for="value,key in config")
+            td( :key="index") 
+              span {{key}}
+            td {{dialogConfig.content.before[index]?dialogConfig.content.before[index][key]:''}}
+            td {{dialogConfig.content.after[index]?dialogConfig.content.after[index][key]:''}}
+    
+    //- 角色管理
+    template(v-else-if="dialogConfig.type===4")
+      .wrap
+        .opcity
+        el-form(label-width="100px")
+          el-form-item(label="角色名称")
+            span {{roleDialog.role}}
+          el-form-item(label="自定义权限")
+            four-checkbox(:options="roleDialog.auth"  :isAllIndeterminated="isAllIndeterminated" :isAllSelected="isAllSelect" :disabled="disabled")

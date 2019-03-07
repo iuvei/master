@@ -1,0 +1,6 @@
+el-row
+  el-col(:span="4")
+    el-checkbox(:indeterminate="indeterminate" v-model="checkAll" @change="onCheckAllChange") 全选
+  el-col(:span="18")
+    el-checkbox-group(v-model="checkList" @change="handleCheckBoxChange")
+      el-checkbox(v-for="option,index in options" :key="index" :label="option.game_type+'_'+option.partner_id") {{option.show_name}}

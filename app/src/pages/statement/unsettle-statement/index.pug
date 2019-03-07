@@ -1,0 +1,29 @@
+.game-statement-container
+  .filter
+    el-form(:model="form" :inline="true" size="small" @keyup.enter.native="onQueryClick" @submit.native.prevent)
+      el-row
+        el-form-item(:label="timeZone.name")
+          day-picker(v-model="days" :defaultValue="[0,0]" ref="dayPicker")
+        el-form-item(label="厅主名称")
+          el-select(v-model="form.hall_id" filterable placeholder="请输入厅主名称" clearable)
+            el-option(v-for="item in companys" :value="item.key" :key="item.key" :label="item.label")
+        el-form-item.btn
+          el-button(type="primary" @click="onQueryClick") 查询
+          el-button(@click="onResetClick") 重置
+          el-button(type="primary" @click="onDownloadClick" v-if="unauthorizedBtnDic.export") 导出
+      el-row
+        el-form-item(label="游戏类别")
+          .checkbox-group
+            el-checkbox(v-for="item,index in gameTypeParents" :key="index" v-model="item.checked" :indeterminate="item.isIndeterminate" @change="(value) => handleCheckAllChange(item, value)") {{item.name}}
+          el-checkbox-group(v-model="gameTypeActive" @change="checkGameType")
+            el-checkbox(v-for="item,index in gameTypes" :label="item.index" :key="index") {{item.game_name}}
+
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading" :span-method="spanMethod" ref="table")
+      el-table-column(label="游戏类别" prop="gameType" align="center")
+      el-table-column(label="厅主名称" prop="companyName" align="center")
+      el-table-column(label="未结算注单数" prop="betCount" align="center")
+      el-table-column(label="未结算注单投注金额" prop="betAmount" align="center")
+        template(slot-scope="scope")
+          .right(:class="{red: scope.row.betAmount < 0, green: scope.row.betAmount > 0}") {{$toThousands(scope.row.betAmount)}}
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)

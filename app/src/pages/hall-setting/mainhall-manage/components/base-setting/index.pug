@@ -1,0 +1,48 @@
+el-dialog.base-setting(v-if="dialogVisible" :visible.sync="dialogVisible" title="基础设置" width="670px" :close-on-click-modal="false")
+  el-tabs(v-model="activeName" type="card" @tab-click="handleClick")
+    el-tab-pane(label="厅状态调整" name="hall")
+      el-form(size="small" :model="form" ref="form" label-width="140px")
+        el-form-item(label="该厅状态")
+          el-radio-group(v-model="form.status" :disabled="!disabled")
+            el-radio(:label="1") 正常
+            el-radio(:label="2") 冻结
+            el-radio(:label="0") 停用
+        el-form-item(v-if="form.status === 2" label="冻结终端")
+          el-checkbox-group(v-model="form.checkList")
+            el-checkbox(label="admin") 厅后台
+            el-checkbox(label="user") 会员端和代理端
+        p.status_remark 关闭说明: 前后端页面打开为404页面
+        p.status_remark 冻结说明: 冻结后，帐号不登录对应的终端
+    el-tab-pane(label="修改密码" name="password")
+      el-form(size="small" :model="formPassword" ref="formPassword" label-width="140px")
+        el-form-item(label="厅主名称")
+          el-input(v-model="form.company_name" disabled)
+        el-form-item(label="新密码" prop="password_one" :rules="[{ required: activeName==='password', message: '请输入密码', trigger: ['blur', 'change'] },{validator: validatorPassword}]")
+          el-input(v-model="formPassword.password_one")
+        el-form-item(label="确认新密码" prop="password_two" :rules="[{ required: activeName==='password' && formPassword.password_one, message: '请重复密码', trigger: ['blur', 'change'] },{validator: validatorPasswordTwo}]")
+          el-input(v-model="formPassword.password_two")
+    el-tab-pane(label="开启短信通道" name="sms")
+      el-form(size="small" :model="form" ref="form" label-width="140px")
+        el-form-item(label="厅主名称")
+          el-input(v-model="form.company_name" disabled)
+        el-form-item(label="短信平台")
+          el-radio-group(v-model="form.sms_id" @change="changeSms")
+            el-radio(v-for="item,index in smsList" :key="index" :label="item.sms_id") {{item.name}}
+        div(v-if="form.config && Object.keys(form.config).length > 0")
+          el-form-item(v-for="item,key in form.config" :key="key" :label="key")
+            el-input(v-model="form.config[key]" :type="key === 'tpl' ?'textarea':'text'")
+    el-tab-pane(label="谷歌账号管理" name="google")
+      el-table(:data="googleData" stripe border style="width: 100%")
+        el-table-column(align="center" prop="username" label="账号")
+          template(slot-scope="scope")
+            span {{scope.row.username}}
+        el-table-column(align="center" prop="is_bind" label="账号")
+          template(slot-scope="scope")
+            span(:style="{color:scope.row.is_bind === 0 ?'red':'green'}") {{scope.row.is_bind === 0 ? '未绑定':'已绑定'}}
+        el-table-column(align="center" label="操作" width="200")
+          template(slot-scope="scope")
+            el-button(v-if="scope.row.is_bind === 1" type="text" size="small" @click="unBind(scope.row)") 解绑
+    
+  .dialog-footer(slot="footer")
+    el-button(size="small" @click="dialogVisible = false") 取消
+    el-button(size="small" type="primary" @click="submit" :disabled="!disabled && activeName === 'hall'") 确定

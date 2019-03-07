@@ -1,0 +1,65 @@
+.receipt-summary-container
+  .receipt-summary-form-container.filter
+    el-form(:inline="true")
+      el-form-item(:label="timeZone.name")
+        day-picker(v-model="date" :defaultValue="[0,0]" @input="dateChange" ref="dayPicker")
+      el-form-item(:label="'厅主名称'")
+        el-select(v-model="formData.hall_id" size="small" filterable placeholder="请输入厅主名称" clearable)
+          el-option(v-for="item in hallList" :value="item.key" :key="item.key" :label="item.label")
+      el-form-item(:label="'用户类别'")
+        el-select(v-model="formData.user_type" size="small")
+          el-option(v-for="item in typeList" :value="item.value" :key="item.value" :label="item.label")
+      el-form-item(:label="'用户账号'")
+        el-input(v-model="formData.name" size="small" style="width: 140px")
+      el-form-item.query
+        el-button(type="primary" size="small" @click="doQuery") 查询
+        el-button(size="small" @click="doReset") 重置
+        el-button(type="primary" @click="onDownloadClick" v-if="unauthorizedBtnDic.id_1" size="small") 导出
+  .receipt-summary-table-container
+    el-row.hallinfo(v-if="formData.hall_id && formData.name")
+      span 厅主名称:{{hallname}}
+      span 会员账号:{{formData.name}}
+    el-row(v-loading="loading" element-loading-text="拼命加载中")
+      el-table(:data="tableData" border)
+        el-table-column(prop="date" :label="'结算日期'" width="150" align="center")
+        //- el-table-column(prop="userBalance.yesterday" :label="'昨日余额'")
+        el-table-column(prop="deposit_total_amount" :label="'入款总额'" :render-header="renderTableHeader" align="center")
+          template(slot-scope="scope")
+            el-popover(trigger="hover" placement="left" v-if="scope.row.date.indexOf('-') !== -1")
+              table(style="font-size: 12px;width: 100%;text-align: center;")
+                tr(style="background-color: #d3dce6;")
+                  th(style="padding: 8px 0;") 收入
+                  th(style="padding: 8px 0;") 收入金额
+                tr
+                  td(style="background-color: #eef1f6;") 公司入款
+                  td
+                    el-button(type="text") {{scope.row.deposit_offline_amount}}
+                tr
+                  td(style="background-color: #eef1f6;") 线上支付
+                  td
+                    el-button(type="text") {{scope.row.deposit_online_amount}}
+                tr
+                  td(style="background-color: #eef1f6;") 人工存入
+                  td
+                    el-button(type="text") {{scope.row.deposit_manual_amount}}
+              span(slot="reference" style="cursor: pointer;")
+                el-tag {{ scope.row.deposit_total_amount }}
+            span(v-else) {{scope.row.deposit_total_amount}}
+        el-table-column(prop="withdraw_online_amount" :label="'会员出款总额'" :render-header="renderTableHeader" align="center")
+        el-table-column(prop="withdraw_manual_amount" :label="'人工提出'" :render-header="renderTableHeader" align="center")
+        el-table-column(prop="withdraw_fee_amount" :label="'会员出款被扣金额'" :render-header="renderTableHeader" align="center")
+        el-table-column(prop="coupon_total_amount" :label="'给予优惠'" :render-header="renderTableHeader" align="center")
+        el-table-column(prop="rebet_amount" :label="'给予返水'" :render-header="renderTableHeader" align="center")
+        el-table-column(prop="withdraw_refuse_amount" :label="'拒绝出款金额'" :render-header="renderTableHeader" align="center")
+        //- el-table-column(prop="userBalance.today" :label="'今日余额'")
+      el-row.bottomRow
+        el-col(:span="8")
+          .footer-total
+            div 总入款 - 总出款 :  {{pageInfo.transfer_diff_balance}}&nbsp;&nbsp;&nbsp;&nbsp;赠送存入：{{pageInfo.send_balance}}
+            div 总入款 = 公司入款+在线充值+手动存款
+            div 总出款 = 会员出款+人工提出
+            div 赠送入款 = 返水+优惠
+            .tip 本页面十分钟统计一次
+        el-col(:span="16")
+          el-pagination.pagination.bottomPagi(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="pageInfo.page" :page-sizes="pageInfo.sizes" :page-size="pageInfo.size" layout="total, sizes, prev, pager, next, jumper" :total="pageInfo.total" background)
+   

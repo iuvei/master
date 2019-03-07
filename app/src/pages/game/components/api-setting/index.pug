@@ -1,0 +1,25 @@
+div.aipSeting
+  el-radio-group(v-model="tabPosition" style="margin-bottom: 30px;" @change="handleClick")
+    el-radio-button(label="0") 热门
+    el-radio-button(label="1") 电子
+    el-radio-button(label="2") 视讯
+    el-radio-button(label="3") 体育
+    el-radio-button(label="4") 电竞
+    el-radio-button(label="5") 彩票
+    el-radio-button(label="6") 棋牌
+
+  .table(style="position:relative")
+      .tiitl(style='display:flex; justify-content :space-between')
+        .zhu(style="margin-bottom:20px" v-text='zhuText[tabPosition]')
+        el-button(size='small' style='margin:0 20px 20px 0' v-if="tableData&&tableData.length>0" type='success' @click='onDialogSaveClick' :loading="isSaveLoading") 保存排序
+      el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+        el-table-column(align="center" v-for="item, index in tableHead" :key="item.index" :label="item.label" :prop="item.prop" :width="item.width" :min-width="item.minWidth" :formatter="item.formatter")
+        el-table-column(align="center" v-if='tabPosition==0' label="是否显示" )
+          template(slot-scope="scope")
+            el-switch( v-model="scope.row.is_hot" @change='changeHot(scope.row)'  active-color="#13ce66" inactive-color="#ff4949" :disabled='!unauthorizedBtnDic.id_1')
+        el-table-column(align="center" v-if='tabPosition!=0' label="是否添加热门标识" )
+          template(slot-scope="scope")
+            el-switch( v-model="scope.row.is_hot" @change='changeHot(scope.row)'  active-color="#13ce66" inactive-color="#ff4949" :disabled='!unauthorizedBtnDic.id_1')
+        el-table-column(align="center" label="排序")
+          template(slot-scope="scope")
+            el-input(v-model="scope.row.sort" type='number' @blur='change(scope.row.sort)' :disabled='!unauthorizedBtnDic.id_2')

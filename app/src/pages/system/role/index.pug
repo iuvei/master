@@ -1,0 +1,19 @@
+.role
+  .filter
+    form-common(v-if="unauthorizedBtnDic['add']" :item="filterItem")
+
+  .table
+    table-common(
+      :tableData="tableData" 
+      :tableHead="tableHead" 
+      :paginationObj="paginationObj"  
+      v-loading="isLoading"
+      @changeSizeAndPage="changeSizeAndPage"
+    )
+
+  //- 弹框
+  el-dialog(:title="dialogTitle" width="800px" top="6vh" :visible.sync="isDialogVisible" @close="onDialogClosed" :close-on-click-modal="false")
+    form-common(:form="dialogForm" :item="dialogItem" :isInline="false" :rules="dialogRules" ref="formcommon" :key="customId") 
+    .dialog-footer(slot="footer")
+      el-button(@click="onDialogClosed") 取 消
+      el-button(type="primary" @click="onDialogSaveClick" :disabled="customId===1||roleId===customId") 保 存

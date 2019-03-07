@@ -1,0 +1,4 @@
+.language
+  el-radio(v-for="item, index in list" :key="index" v-model="locale" :label="item.label" @change="onChange")
+    img(:src="item.img")
+    span {{ item.text }}

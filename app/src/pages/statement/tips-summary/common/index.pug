@@ -1,0 +1,40 @@
+.receipt-summary-container
+  .receipt-summary-form-container.filter
+    el-form(:inline="true")
+      el-form-item(:label="timeZone.name")
+        day-picker(v-model="date" :defaultValue="[0,0]" @input="dateChange" ref="dayPicker")
+      el-form-item(:label="'厅主名称'")
+        el-select(v-model="formData.hall_id" size="small" filterable placeholder="请输入厅主名称" clearable)
+          el-option(v-for="item in hallList" :value="item.hall_id" :key="item.hall_id" :label="item.hall_name")
+      el-form-item(:label="'用户类别'")
+        el-select(v-model="formData.user_type" size="small")
+          el-option(v-for="item in typeList" :value="item.value" :key="item.value" :label="item.label")
+      el-form-item(:label="'用户账号'")
+        el-input(v-model="formData.name" size="small" style="width: 140px")
+      el-form-item.query
+        el-button(type="primary" size="small" @click="doQuery") 查询
+        el-button(size="small" @click="doReset") 重置
+        el-button(size="small" type="primary" @click="onDownloadClick" v-if="unauthorizedBtnDic.id_1") 导出
+  .filter
+    el-form(:inline="true")
+      el-row
+        el-form-item(label="游戏类别")
+          .checkbox-group
+            el-checkbox(v-for="item,index in gameTypeParents" :key="index" v-model="item.checked" :indeterminate="item.isIndeterminate" @change="(value) => handleCheckAllChange(item, value)") {{item.name}}
+          el-checkbox-group(v-model="gameTypeActive" @change="checkGameType")
+            el-checkbox(v-for="item,index in gameTypes" :label="item.index" :key="index") {{item.game_name}}
+          
+  .receipt-summary-table-container
+    div.red(v-if="type === 'bonus'") 注：表数据为第三方游戏发放给玩家的红包金额
+    div.red(v-if="type === 'tips'") 注：表数据为游戏玩家打赏给游戏的小费金额
+    el-row.hallinfo(v-if="formData.hall_id && formData.name")
+      span 厅主名称:{{hallname}}
+      span {{formData.user_type === 'user' ? '会员':(formData.user_type === 'agent' ? '代理':'股东')}}账号:{{formData.name}}
+    el-row(v-loading="loading" element-loading-text="拼命加载中")
+      el-table(:data="tableData" border)
+        el-table-column(prop="name" :label="'游戏平台'" align="center")
+        el-table-column(prop="date" :label="'统计日期'" align="center")
+        el-table-column(:prop="type === 'tips' ? 'tips_amount' : 'redbag_amount'" :label="type=== 'tips'? '小费金额': '红包金额'" align="center")
+        el-table-column(:prop="type === 'tips' ? 'tips_times' : 'redbag_times'" :label="type=== 'tips'? '小费笔数':'红包笔数'" align="center") 
+      el-pagination.pagination.bottomPagi(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="pageInfo.page" :page-sizes="pageInfo.sizes" :page-size="pageInfo.size" layout="total, sizes, prev, pager, next, jumper" :total="pageInfo.total" background)
+   

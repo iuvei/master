@@ -1,0 +1,47 @@
+.frame
+  el-tabs(v-model="activeName" @tab-click="handleClick" type="border-card")
+    el-tab-pane(v-for="item,key in tabsName" :key="key" :label="item.label" :name="item.name")
+      template(v-if="item.name=='repair'")
+        el-tabs(v-model="repairListName" @tab-click="repairListClick")
+          el-tab-pane(v-for="item,index in tabsRepair" :key="index" :label="item.label" :name="item.value")
+            .table
+              el-table(:data="tableData" border)
+                el-table-column(align="center" prop="game_name" label="游戏平台" )
+                el-table-column(align="center" label="选择抓取数据时间段" ) 
+                  template(slot-scope="scope")
+                    datetimePicker(v-model="scope.row.date" :shortcutSelection="pickerOptions" :disabled="scope.row.begin_time.length>0" :defaultValue="[0,0]")
+                    //- el-date-picker(type="datetimerange" v-model="scope.row.date" :disabled="scope.row.begin_time.length>0")
+                el-table-column(align="center" label="操作" width="300")
+                  template(slot-scope="scope")
+                    el-button(v-if="scope.row.is_repair=='0'" v-show="unauthorizedBtnDic.id_1" type="primary" size="small" @click="doRepair(scope.row)") 补单
+                    span(v-else style="color:#d6d6d6") 补单中...
+      template(v-if="item.name=='record'")
+        div
+          .filter
+            el-form(:inline="true" size="small" :model="form" ref="form")
+              el-form-item(label="操作时间：")
+                day-picker(v-model="form.recordDate" :defaultValue="[0,0]" ref="dayPicker")
+              el-form-item(label="操作人：")
+                el-input(v-model="form.username")
+              el-form-item(label="状态：")
+                el-select(v-model="form.status")
+                  el-option(v-for="item in recordOptions" :key="item.value" :label="item.label" :value="item.value")
+              el-form-item.query
+                el-button(type="primary" @click="onQueryClick") 查询
+                el-button(@click="onResetClick") 重置
+                el-button(type="primary" @click="onDownloadClick" v-if="unauthorizedBtnDic.id_2") 导出
+          .table
+            el-table(:data="recordData" border stripe)
+              el-table-column(align="center" label="补单时间范围" width="300")
+                template(slot-scope="scope")
+                  span {{scope.row.begin_time}} 至 {{scope.row.end_time}}
+              el-table-column(align="center" v-for="item,index in recordTable" :key="item.index" :label="item.label" :prop="item.prop" :formatter="item.formatter")
+              el-table-column(align="center" label="状态")
+                template(slot-scope="scope")
+                  span(:class="scope.row.status==1 ? 'text_fail':'text_success'") {{scope.row.status==1 ? '补单中':'已完成'}}
+  
+  el-dialog(title="系统提示" :visible="dialogVisible" width="30%" :before-close="handleClose" :close-on-click-modal="false")
+    div 确定对{{this.game_name}}在{{this.time_begin}} - {{this.time_end}}时间段进行补单操作吗？
+    div(slot="footer" class="dialog-footer")
+      el-button(size="small" @click="dialogVisible=false") 取消
+      el-button(type="primary" size="small" @click="clickRepair") 确认

@@ -1,0 +1,88 @@
+.header
+  line-height 44px
+  height 44px
+  min-width 700px
+  position fixed
+  z-index 2000
+  background-color #313b55
+  color #fff
+  box-shadow 4px 4px 10px 0 rgba(102, 179, 255, 0.4)
+  display flex
+  width 100%
+
+  .logo
+    background-color #313b50
+    color #fff
+    width 180px
+    line-height 44px
+    height 44px
+    transition 0.3s all ease-in-out
+    text-overflow ellipsis
+    white-space nowrap
+    overflow hidden
+
+  a
+    color #fff
+    font-size 16px
+    text-decoration none
+
+  strong
+    margin-left 4px
+
+  i.iconfont
+    margin-left 20px
+
+  .toggle
+    float left
+    width 64px
+    text-align center
+    height 44px
+    line-height 44px
+    cursor pointer
+    font-size 15px
+
+    i
+      font-size 18px
+      padding-top 12px
+
+  .right
+    min-width 950px
+    flex 1
+
+    .time
+      float left
+      font-size 15px
+
+    .menu
+      float right
+      display flex
+      flex-direction row-reverse
+      padding 0 10px
+
+      .btn
+        color #fff
+        font-size 15px
+        margin 0 12px
+
+      .el-dropdown-link
+        color #fff
+        margin 0 10px
+        border none
+        cursor pointer
+
+        span
+          font-size 15px
+
+        &:focus
+          outline none
+
+      >>>
+        .el-badge
+          margin-right 10px
+
+          .el-badge__content
+            height 15px
+
+          .el-badge__content.is-fixed
+            top 10px
+            right 18px

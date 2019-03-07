@@ -1,0 +1,59 @@
+.home-menu
+  z-index 998
+  background-color #fff
+  transition 0.3s all ease-in-out
+  background-color #e4e8f1
+
+  &::-webkit-scrollbar
+    width 8px
+
+  &::-webkit-scrollbar-thumb
+    border-radius 5px
+    -webkit-box-shadow inset 0 0 5px rgba(0, 0, 0, 0.2)
+    background-color #fff
+
+  &::-webkit-scrollbar-track
+    border-radius 0
+    background-color #eef1f6
+
+  &.expanded
+    flex 0 0 180px
+    width 180px
+    overflow-y auto
+    overflow-x inherit
+
+  &.collapsed
+    -webkit-flex 0 0 64px
+    -ms-flex 0 0 64px
+    flex 0 0 64px
+    width 64px
+
+  >>>
+    .el-menu
+      background-color #e4e8f1
+      width 180px
+
+      &.el-menu--collapse
+        width 64px
+
+    .el-menu-item
+      background-color #eef1f6
+
+    .el-menu-item:hover, .el-submenu__title:hover
+      background-color #b2eff0
+
+    .el-menu-item, .el-submenu__title
+      height 50px
+      line-height 50px
+
+    .el-submenu__title span
+      font-weight bold
+
+    .el-menu-item, .el-submenu__title
+      padding-left 24px
+
+      i
+        display inline-block
+        width 16px
+        height 16px
+        margin-right 8px

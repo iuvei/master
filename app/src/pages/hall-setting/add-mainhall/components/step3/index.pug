@@ -1,0 +1,9 @@
+.add-mianhall-step3-container
+  el-form(label-width="120px")
+    el-row(v-for="partnerType in partnerTypes" :key="partnerType.code")
+      el-col(:span="24")
+        el-form-item(prop="name" :label="`${partnerType.name}:`")
+          .checkbox-container
+            el-checkbox(:indeterminate="partnerType.isIndeterminate", v-model="partnerType.checkAll" :disabled="disabled" @change="(val)=>checkAll(partnerType,val)") 全选
+            el-checkbox-group(v-model="partnerType.checks" @change="(val)=>checkedChange(partnerType, val)" :disabled="disabled")
+              el-checkbox(v-for="partner in partnerType.children" :label="partner.id" :key="partner.id") {{partner.show_name}}

@@ -1,0 +1,4 @@
+div
+  el-tabs(v-model="activeName" type="border-card" @tab-click="handleClick")
+    el-tab-pane(v-for="item,index in gamelist" :key="index" :label="formatLabel(item.game_name,item.game_type)" :name="item.game_name")
+      common(:query="item" v-if="activeName === item.game_name")

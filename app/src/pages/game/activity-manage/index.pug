@@ -1,0 +1,82 @@
+div.actice
+  .filter
+    el-form(:model="form" :inline="true" size="small")
+      el-form-item(label="活动名称")
+        el-input(v-model="form.title" )
+      el-form-item(label="状态")
+        el-select(v-model="form.status" placeholder="请选择")
+          el-option(v-for="item in optionStatus" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="活动时间")
+        day-picker(v-model="days" :defaultValue="[0,0]" ref="dayPicker")
+      el-form-item.btn
+        el-button(type="primary" @click="onQueryClick") 查询
+        el-button(@click="onResetClick") 重置
+    el-form
+      el-button.addbtn(@click="addClick"  type="success"  size='small' v-if='unauthorizedBtnDic.id_1') 新增API活动
+
+  .table
+    el-table(:data="tableData" stripe border style="width: 100%" v-loading="isLoading")
+      el-table-column(align="center" label="活动名称"  prop="title")
+      el-table-column(align="center" label="活动类型"  prop="type")
+      el-table-column(align="center" label="API名称"  prop="partner_name")
+      el-table-column(align="center" label="PC缩略图" )
+        template(slot-scope="scope")
+          img.img(:src='scope.row.img_pc')
+      el-table-column(align="center" label="H5缩略图" )
+        template(slot-scope="scope")
+          img.img(:src='scope.row.img_h5')
+      el-table-column(align="center" label="H5跳转链接"  prop="link_h5")
+      el-table-column(align="center" label="PC跳转链接"  prop="link_pc")
+      el-table-column(align="center" label="创建时间" width='150px' prop="created_at")
+      el-table-column(align="center" label="开始时间" width='150px'  prop="begin_time")
+      el-table-column(align="center" label="结束时间" width='150px'  prop="end_time")
+      el-table-column(align="center" label="状态"  prop="status")
+        template(slot-scope="scope")
+          span(:class="scope.row.status==0 ? 'text_fail':'text_success'") {{scope.row.status==0 ? '停用':'启动'}}
+      el-table-column(align="center" label="操作" width="300")
+        template(slot-scope="scope")
+          el-button(type="danger" v-if='scope.row.status&&unauthorizedBtnDic.id_2' size="mini" @click="disc(scope.row,0)") 停 用
+          el-button(type="success" v-if='!scope.row.status&&unauthorizedBtnDic.id_2' size="mini" @click="disc(scope.row,1)") 启 用
+          el-button(type="primary" size="mini" @click='edit(scope.row)' v-if='unauthorizedBtnDic.id_3') 编 辑
+          el-button(type="danger" size="mini" @click='remove(scope.row)' v-if='unauthorizedBtnDic.id_4') 删 除
+    el-pagination(@size-change="onPageSizeChange" @current-change="onCurrentChange" :current-page="page" :page-sizes="sizes" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" background)
+
+
+  el-dialog(:title="dialogTitle"   width='550px'  :visible.sync="isDialogVisible"  @close='onResetFields' :close-on-click-modal="false")
+    el-form(:model="dialogform" labelWidth='120px' :rules="rules"  size="small" ref="dialogForm")
+      el-form-item(label="活动名称" prop='title')
+        el-input(v-model="dialogform.title")
+      el-form-item(label="活动类型" prop='type')
+        el-select(v-model="dialogform.type" placeholder="请选择" @change='changeType' :disabled='dialogTitle=="编辑API活动"')
+          el-option(v-for="item in optionType" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="游戏API" v-if='dialogform.type==3||dialogform.type==7' prop='partner_id')
+        el-select(v-model="dialogform.partner_id" placeholder="请选择")
+          el-option(v-for="item in optionAPI" :key="item.value" :label="item.label" :value="item.value")
+      el-form-item(label="显示位置" v-if='dialogform.type==1' prop='location')
+        el-radio-group(v-model="dialogform.location" )
+          el-radio(label="1") 左下
+          el-radio(label="2") 右下
+      el-form-item(label="H5跳转链接" prop='link_h5')
+        el-input(v-model="dialogform.link_h5")
+      el-form-item(label="PC跳转链接" prop="link_pc" v-if="dialogform.type!=9")
+        el-input(v-model="dialogform.link_pc")
+
+      el-form-item(label="PC端图片上传" prop="img_pc" v-if="dialogform.type!=9")
+        upload(v-model='dialogform.img_pc' accept=".png, .jpg, .jpeg" listType="picture"  :sizeText='sizeTextPc' :fileList="fileListPc"  :maxpic='maxpic' :clean="!isDialogVisible" )
+      
+      el-form-item(label="H5端图片上传" prop="img_h5" v-if='dialogform.type!=1')
+        upload(v-model='dialogform.img_h5' accept=".png, .jpg, .jpeg" :sizeText='sizeTextH5' listType="picture"  :fileList="fileListH5"  :maxpic='maxpic' :clean="!isDialogVisible" )
+        
+      el-form-item(label="活动时间" prop='activeTime')
+        datetimePicker(v-model='dialogform.activeTime' :shortcutSelection="[]")
+      //- el-form-item(label="开始时间" prop='begin_time')
+        //- el-date-picker(v-model="dialogform.begin_time"  type="datetime" placeholder="选择日期")
+      //- el-form-item(label="结束时间" prop='end_time')
+        el-date-picker(v-model="dialogform.end_time"  type="datetime" placeholder="选择日期")
+      el-form-item(label="状态" prop='status')
+        el-radio-group(v-model="dialogform.status" )
+          el-radio(label="1") 启用
+          el-radio(label="0") 停用
+    .dialog-footer(slot="footer")
+      el-button(@click="onResetFields" size="small") 取 消
+      el-button(type="primary" @click="onDialogSaveClick" :loading="isSaveLoading" size="small") 保 存

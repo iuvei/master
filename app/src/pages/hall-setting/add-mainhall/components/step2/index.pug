@@ -1,0 +1,22 @@
+.add-mianhall-step2-container
+  el-form(:model="formData" ref="form" label-width="120px")
+    el-row()
+      el-col(:span="24" v-for="domain,index in formData.domains" :key="index")
+        el-form-item(:label="index === 0 ? '域名:' : ''" :prop="`domains[${index}]`" :rules="domainRule" required)
+          .input-btn-group
+            el-input(v-model="formData.domains[index]" :disabled="disabled")
+            .btn-group(v-if="!disabled")
+              el-button(v-if="formData.domains.length > 1" @click="deleteDomain(index)") 删除
+              el-button(type="primary" v-if="index === formData.domains.length - 1" @click="addDomain") 继续添加
+      el-col(:span="24" v-if="!disabled")
+        el-form-item.red(label="温馨提示:") 一个完整的域名由二个或二个以上部分组成，各部分之间用英文的句号"."来分隔，例如：gooloe.com
+      el-col(:span="24")
+        el-form-item(prop="is_use_googlekey" label="谷歌验证码:" required)
+          el-radio-group(v-model="formData.is_use_googlekey" :disabled="disabled")
+            el-radio(:label="true") 启用
+            el-radio(:label="false") 停用
+      el-col(:span="24")
+        el-form-item(prop="status" label="厅主状态:" required)
+          el-radio-group(v-model="formData.status" :disabled="disabled")
+            el-radio(:label="1") 启用
+            el-radio(:label="0") 停用

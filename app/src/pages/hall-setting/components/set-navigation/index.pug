@@ -1,0 +1,111 @@
+.setNavigation
+  .table
+    el-table(:data="tableData" row-key="sort" stripe border style="width: 100%" :row-class-name="tableRowClassName")
+      el-table-column(v-for="item,index in tableHeadPc" :key="index" :label="item.label" :prop="item.prop" :width="item.width" :formatter="item.formatter" align="center")
+      template(v-if="this.type=='pc'")
+        el-table-column(align="center" label="字体颜色")
+          template(slot-scope="scope")
+            el-input(v-model="scope.row.color" size="small" disabled)
+        el-table-column(align="center" label="PC显示hot标识")
+          template(slot-scope="scope")
+            el-switch(v-show="!scope.row.code" v-model="scope.row.is_hot" :active-value="true" :inactive-value="false" @change="(val)=>statusChange(val,scope.row,'is_hot')" size="small")
+      el-table-column(align="center" :label="this.type=='pc'?'PC前端显示':'前端是否显示'")
+        template(slot-scope="scope")
+          el-switch(v-show="scope.row.code!='home'" v-model="scope.row.is_display" @change="(val)=>statusChange(val,scope.row,'is_display')" size="small")
+      el-table-column(align="center" label="操作" width="300")
+        template(slot-scope="scope")
+          el-button(v-show="scope.row.is_edit" type="primary" size="small" @click="doEdit(scope.row)") 编辑
+          el-button(v-show="type!='h5'&&scope.row.is_edit" type="danger" size="small" @click="doDelete(scope.row.name,scope.row.id)") 删除
+  .tips 温馨提示: 鼠标左键选中排序图标, 拖动当前行移动到目标位置后再点击保存可重新排序。
+  el-dialog(v-if="addPcDialogVisible" title="新增一级导航" :visible="addPcDialogVisible" :before-close="handleClose" :close-on-click-modal="false")
+    el-form(:inline="true" label-width="110px" label-position="right" ref="firstForm" :model="firstForm")
+        template(v-show="firstNavList&&firstNavList.length")
+          el-form-item.formBlock(v-for="item,index in firstNavList" :key="index" prop="firstNavList")
+            el-button.delete(v-if="index!==0" @click.stop.prevent="deleteFirstNav(index)" size="small") 删除
+            el-form-item.forminline(
+              label="一级导航名称:"
+              :prop="'firstNavList['+index+'].name'"
+              :rules="[{ required: true, message: '请输入一级导航名称', trigger:'change' },{ validator: validateFirstNav, trigger: ['blur','change'] }]"
+            )
+              el-input(v-model="item.name" size="small") 
+            el-form-item.forminline(label="跳转游戏:" :prop="'firstNavList['+index+'].list'" :rules="[{ type: 'array', required: true, message: '请选择跳转游戏', trigger: ['change'] }]")
+              el-cascader(:options="pcCascader" change-on-select v-model="item.list")
+            el-form-item.forminline(label="跳转开关:")
+              el-switch(v-model="item.jump_switch" size="small")
+            el-form-item.forminline(label="字体颜色:" :prop="'firstNavList['+index+'].color'"  :rules="[{ required: true, message: '请输入字体颜色', trigger: 'change'}]")
+              el-input(v-model="item.color" size="small")
+            el-form-item.forminline(label="显示hot标识:")
+              el-switch(v-model="item.is_hot" size="small")
+          el-form-item.formBlock
+            el-button(@click="addFirstNav") +添加一级导航
+          el-form-item.formBlock
+            el-button(@click="handleClose") 取消
+            el-button(@click="doLook") 预览并保存
+            el-button(@click="saveFirstNav") 保存
+  el-dialog(v-if="dialogVisible" title="导航栏设置" :visible="dialogVisible" :before-close="handleClose" :close-on-click-modal="false")
+    template(v-if="!pcEdit")
+      el-form(:model="form" :inline="true" ref="customForm")
+        el-form-item.formBlock(v-if="!pcEdit" label="已选：")
+          el-tag(v-for="tag,index in tags" :key="index" style="margin:0 5px" closable @close="removeSelect(tag)") {{tag.game_name}}
+        el-form-item(
+          label="游戏大类名称:" 
+          prop="name"
+          :rules="[{ required: true, message: '请输入游戏大类名称', trigger:'change' },{ validator: validateTagName, trigger: ['blur','change'] }]"
+        )
+          span(v-show="!addFirst") {{form.name}}
+          el-input(v-show="addFirst" v-model="form.name" size="small" )
+        //- el-form-item(v-if="addFirst" label="前端是否显示:")
+        //-   el-switch(v-model="form.is_display" size="small" )
+        el-form-item.formBlock(label="对应游戏/api:")
+          el-select(v-model="selectList" size="small" style="margin-right:20px" @change="changeList")
+            el-option(v-for="item in apiList" :key="item.id" :label="item.label" :value="item.value")
+          el-select(v-show="secondApiList&&secondApiList.length" v-model="secondSelectList" size="small" style="margin-right:20px")
+            el-option(v-for="item in secondApiList" :key="item.id" :label="item.label" :value="item.value")
+          el-button(type="primary" size="small" @click="addApi") 添加
+        el-form-item.formBlock
+          el-checkbox(:indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange") 全选
+          el-checkbox-group(style="margin:15px 0" v-model="checklist" @change="handleCheckedGamesChange")
+            el-checkbox(v-if="item.partner_name" v-for="item in gameList" :key="item.id" :label="item.typeID") {{item.game_name}}
+        el-form-item.formBlock
+          el-button(type="default" size="small" @click="handleClose") 取消
+          el-button(type="primary" plain size="small" @click="doLook") 预览并保存
+          el-button(type="primary" size="small" @click="doSave") 保存
+    template(v-if="pcEdit")
+      el-form(:model="pcForm" :inline="true" ref="pcForm")      
+        el-form-item(
+          label="一级导航名称:"
+          prop="name"
+          :rules="[{ required: true, message: '请输入一级导航名称', trigger:'change' },{ validator: (rule,value,callback)=>validateEditNav(rule,value,callback,pcForm.id), trigger: ['blur','change'] }]"
+        )
+          el-input(v-model="pcForm.name" size="small" )
+        el-form-item(label="字体颜色:" prop="color" :rules="[{ required: true, message: '请输入字体颜色', trigger: 'change'}]")
+          el-input(v-model="pcForm.color" size="small" )
+        el-form-item(label="显示hot标识:")
+          el-switch(v-model="pcForm.is_hot" size="small" )
+        el-form-item(label="跳转游戏:")
+          el-cascader(:options="pcCascader" change-on-select v-model="pcGameSelect")
+        el-form-item(label="跳转开关:")
+          el-switch(v-model="pcForm.jump_switch" size="small" )
+        template(v-show="secondList&&secondList.length")
+          el-form-item(v-for="item,index in pcForm.secondList" :key="index" prop="secondList")
+            el-form-item(
+              label="二级导航名称:"
+              :prop="'secondList['+index+'].name'"
+              :rules="[{ required: true, message: '请输入二级导航名称', trigger:'change' },{  min: 2, max: 10, message: '长度在2到10个字段', trigger:'change' }]" 
+            )
+              el-input(v-model="pcForm.secondList[index].name" size="small" style="margin-right:20px")
+            el-form-item(
+              label="跳转游戏:"
+              :prop="'secondList['+index+'].list'"
+              :rules="[{ required: true, message: '请选择跳转游戏', trigger: 'change'}]"
+            )
+              el-cascader(:options="pcCascader" size="small" v-model="pcForm.secondList[index].list")
+            el-form-item
+              el-button(type="danger" size="small" @click="deleteSecondList(index)") 删除
+        el-form-item.formBlock
+          el-button(type="primary" size="small" @click="addSecondNav") 添加二级导航
+        el-form-item.formBlock
+          el-button(type="default" size="small" @click="handleClose") 取消
+          el-button(type="primary" plain size="small" @click="doLook") 预览并保存
+          el-button(type="primary" size="small" @click="doSave") 保存
+

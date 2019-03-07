@@ -1,0 +1,30 @@
+.home-setting
+  position fixed
+  top 44px
+  right 0
+  background-color #ffffff
+  padding 10px 25px
+  width 180px
+  border 1px solid #dfe6ec
+  color #48576a
+  box-shadow -5px 8px 19px #d3dce6
+
+  .title
+    font-weight bold
+    border-bottom 1px solid #dfe6ec
+
+  .content
+    font-size 14px
+
+  .sound-switch
+    margin-left 20px
+
+.slide-fade-enter-active
+  transition all 0.3s ease
+
+.slide-fade-leave-active
+  transition all 0.3s cubic-bezier(1, 0.5, 0.8, 1)
+
+.slide-fade-enter, .slide-fade-leave-to
+  transform translateX(100px)
+  opacity 0
